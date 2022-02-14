@@ -1,0 +1,196 @@
+service: aws-python
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.8
+
+custom:
+  cognitoArn: arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_b2hdBwhV6
+
+functions:
+  # child
+  GetChildData:
+    handler: children.get_child_data
+    role: ChildrenRole
+    events:
+      - http:
+          path: children-mock
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+  AddChildData:
+    handler: children.add_child_data
+    role: ChildrenRole
+    events:
+      - http:
+          path: children-mock
+          method: post
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+  # teacher
+  GetTeacherData:
+    handler: teacher.get_teacher_data
+    role: TeacherRole
+    events:
+      - http:
+          path: teacher-mock
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+
+  AddTeacherData:
+    handler: teacher.add_teacher_data
+    role: TeacherRole
+    events:
+      - http:
+          path: teacher-mock
+          method: post
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+  # kindergarten
+  GetKindergartenData:
+    handler: kindergarten.get_kindergarten_data
+    role: KindergartenRole
+    events:
+      - http:
+          path: kindergarten-mock
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+  # attendance
+  GetAttendanceData:
+    handler: attendance.get_attendance_data
+    role: AttendanceRole
+    events:
+      - http:
+          path: attendance-mock
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+  AddAttendanceData:
+    handler: attendance.add_attendance_data
+    role: AttendanceRole
+    events:
+      - http:
+          path: attendance-mock
+          method: post
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+plugins:
+  - serverless-dependson-plugin
+  - serverless-python-requirements
+  - serverless-plugin-stage-variables
+
+resources:
+  Resources:
+    ChildrenRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+    TeacherRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+    KindergartenRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
+    AttendanceRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+              Action: "sts:AssumeRole"
+        Policies:
+          - PolicyName: Policy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
