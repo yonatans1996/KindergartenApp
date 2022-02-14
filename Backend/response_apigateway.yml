@@ -1,0 +1,15 @@
+headers:
+  Content-Type: "'application/json'"
+  Access-Control-Allow-Credentials: "'true'"
+template: $input.json("$")
+statusCodes:
+  400:
+    pattern: '."statusCode":[\s]*400.'
+    template: $input.path("$.errorMessage")
+    headers:
+      Content-Type: "'application/json'"
+  500:
+    pattern: '."statusCode":[\s]*500.'
+    template: $input.path("$.errorMessage")
+    headers:
+      Content-Type: "'application/json'"
