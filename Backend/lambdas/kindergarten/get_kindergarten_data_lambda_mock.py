@@ -44,7 +44,7 @@ children2 = {
 
 
 def get_kindergarten_data(event, context):
-    logging.info("logging works")
+    logging.info(event)
     result = {
         TEACHERS: [
             teacher1,

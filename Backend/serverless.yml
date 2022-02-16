@@ -4,9 +4,10 @@ provider:
   name: aws
   runtime: python3.8
   stage: dev
+  region: ${opt:region,'us-east-1'}
 
 custom:
-  cognitoArn: arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_b2hdBwhV6
+  cognitoAuthorizerArn : arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_LbXxcBWw4
   pythonRequirements:
     dockerizePip: non-linux
 functions:
@@ -73,8 +74,8 @@ functions:
       patterns:
         - 'lambdas/teacher/**'
   # kindergarten
-  GetKindergartenData:
-    handler: lambdas/kindergarten/get_kindergarten_data_lambda.get_kindergarten_data
+  GetKindergartenDataMock:
+    handler: lambdas/kindergarten/get_kindergarten_data_lambda_mock.get_kindergarten_data
     role: KindergartenRole
     events:
       - http:
@@ -85,6 +86,26 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/kindergarten/**'
+  GetKindergartenData:
+    handler: lambdas/kindergarten/get_kindergarten_data_lambda.get_kindergarten_data
+    role: KindergartenRole
+    events:
+      - http:
+          path: kindergarten
+          method: get
+          integration: lambda
+          cors: true
+          request:
+            template: ${file(./request_apigateway.yml)}
+          response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
+
     package:
       patterns:
         - 'lambdas/kindergarten/**'
@@ -143,9 +164,7 @@ resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
+                    - "*"
                   Resource: "*"
     TeacherRole:
       Type: "AWS::IAM::Role"
@@ -168,7 +187,7 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                     - logs:PutLogEvents
-                  Resource: "*"
+                  Resource: "arn:aws:logs:*:*:*"
     KindergartenRole:
       Type: "AWS::IAM::Role"
       Properties:
@@ -190,7 +209,7 @@ resources:
                     - logs:CreateLogGroup
                     - logs:CreateLogStream
                     - logs:PutLogEvents
-                  Resource: "*"
+                  Resource: "arn:aws:logs:*:*:*"
     AttendanceRole:
       Type: "AWS::IAM::Role"
       Properties:
@@ -214,6 +233,64 @@ resources:
                     - logs:PutLogEvents
                   Resource: "*"
 
+    #dynamodb
+    KindergartenTeacherTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+        TableName: "KindergartenTeacherTable"
+    KindergartenTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+        TableName: "KindergartenTable"
+    KindergartenChildTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+        TableName: "KindergartenChildTable"
+    AttendanceTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "child_id"
+            AttributeType: "S"
+          - AttributeName: "date"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "child_id"
+            KeyType: "HASH"
+          - AttributeName: "date"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+        TableName: "AttendanceTable"
+
 
 package:
   patterns:
@@ -223,3 +300,5 @@ package:
     - 'lambdas/__init__.py'
     - 'venv/**'
   individually: true
+
+

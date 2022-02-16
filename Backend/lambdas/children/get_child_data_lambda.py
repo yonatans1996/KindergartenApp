@@ -15,8 +15,3 @@ def get_child_data(event, context):
         GROUP_NUMBER: '1',
     }
     return result
-
-
-def add_child_data(event, context):
-    logging.info(event)
-    return "child was added to database (Not really)"
