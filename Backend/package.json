@@ -1,4 +1,5 @@
 {
+
   "devDependencies": {
     "serverless-dependson-plugin": "^1.1.2",
     "serverless-plugin-stage-variables": "^1.10.1",

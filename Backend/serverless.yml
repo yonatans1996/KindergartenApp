@@ -1,18 +1,18 @@
 service: aws-python
 
-frameworkVersion: '3'
-
 provider:
   name: aws
   runtime: python3.8
+  stage: dev
 
 custom:
   cognitoArn: arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_b2hdBwhV6
-
+  pythonRequirements:
+    dockerizePip: non-linux
 functions:
   # child
   GetChildData:
-    handler: children.get_child_data
+    handler: lambdas/children/get_child_data_lambda.get_child_data
     role: ChildrenRole
     events:
       - http:
@@ -23,8 +23,11 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/children/**'
   AddChildData:
-    handler: children.add_child_data
+    handler: lambdas/children/add_child_data_lambda.add_child_data
     role: ChildrenRole
     events:
       - http:
@@ -35,9 +38,12 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/children/**'
   # teacher
   GetTeacherData:
-    handler: teacher.get_teacher_data
+    handler: lambdas/teacher/get_teacher_data_lambda.get_teacher_data
     role: TeacherRole
     events:
       - http:
@@ -48,9 +54,11 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
-
+    package:
+      patterns:
+        - 'lambdas/teacher/**'
   AddTeacherData:
-    handler: teacher.add_teacher_data
+    handler: lambdas/teacher/add_teacher_data_lambda.add_teacher_data
     role: TeacherRole
     events:
       - http:
@@ -61,9 +69,12 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/teacher/**'
   # kindergarten
   GetKindergartenData:
-    handler: kindergarten.get_kindergarten_data
+    handler: lambdas/kindergarten/get_kindergarten_data_lambda.get_kindergarten_data
     role: KindergartenRole
     events:
       - http:
@@ -74,9 +85,12 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/kindergarten/**'
   # attendance
   GetAttendanceData:
-    handler: attendance.get_attendance_data
+    handler: lambdas/attendance/get_attendance_data_lambda.get_attendance_data
     role: AttendanceRole
     events:
       - http:
@@ -87,8 +101,11 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/attendance/**'
   AddAttendanceData:
-    handler: attendance.add_attendance_data
+    handler: lambdas/attendance/add_attendance_data_lambda.add_attendance_data
     role: AttendanceRole
     events:
       - http:
@@ -99,11 +116,13 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+    package:
+      patterns:
+        - 'lambdas/attendance/**'
 plugins:
   - serverless-dependson-plugin
   - serverless-python-requirements
   - serverless-plugin-stage-variables
-
 resources:
   Resources:
     ChildrenRole:
@@ -194,3 +213,13 @@ resources:
                     - logs:CreateLogStream
                     - logs:PutLogEvents
                   Resource: "*"
+
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!lambdas/**'
+    - '!tests/**'
+    - 'lambdas/__init__.py'
+    - 'venv/**'
+  individually: true
