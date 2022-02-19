@@ -109,7 +109,7 @@ functions:
     package:
       patterns:
         - 'lambdas/kindergarten/**'
-  # attendance
+
   GetAttendanceData:
     handler: lambdas/attendance/get_attendance_data_lambda.get_attendance_data
     role: AttendanceRole
