@@ -1,0 +1,15 @@
+#Resources:
+#  UserPool:
+#    Type: AWS::Cognito::UserPool
+#    Properties:
+#      AliasAttributes:
+#        - phone_number
+#      AutoVerifiedAttributes:
+#        - phone_number
+#      MfaConfiguration: OPTIONAL
+#      UsernameAttributes:
+#        - phone number
+#        - family name
+#        - name
+#      UserPoolName: testUserPool
+#

@@ -7,7 +7,9 @@ provider:
   region: ${opt:region,'us-east-1'}
 
 custom:
-  cognitoAuthorizerArn : arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_LbXxcBWw4
+  cognitoAuthorizerArn: arn:aws:cognito-idp:us-east-1:344089725894:userpool/us-east-1_xVUdvWsda
+  userPoolClientName: test-user-pool-client
+  userPoolName: test-user-pool-name
   pythonRequirements:
     dockerizePip: non-linux
 functions:
@@ -24,6 +26,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/children/**'
@@ -39,6 +45,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/children/**'
@@ -55,6 +65,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/teacher/**'
@@ -70,6 +84,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/teacher/**'
@@ -86,6 +104,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/kindergarten/**'
@@ -145,153 +167,18 @@ plugins:
   - serverless-python-requirements
   - serverless-plugin-stage-variables
 resources:
-  Resources:
-    ChildrenRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - "lambda.amazonaws.com"
-              Action: "sts:AssumeRole"
-        Policies:
-          - PolicyName: Policy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - "*"
-                  Resource: "*"
-    TeacherRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - "lambda.amazonaws.com"
-              Action: "sts:AssumeRole"
-        Policies:
-          - PolicyName: Policy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: "arn:aws:logs:*:*:*"
-    KindergartenRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - "lambda.amazonaws.com"
-              Action: "sts:AssumeRole"
-        Policies:
-          - PolicyName: Policy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: "arn:aws:logs:*:*:*"
-    AttendanceRole:
-      Type: "AWS::IAM::Role"
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: "Allow"
-              Principal:
-                Service:
-                  - "lambda.amazonaws.com"
-              Action: "sts:AssumeRole"
-        Policies:
-          - PolicyName: Policy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: "*"
-
-    #dynamodb
-    KindergartenTeacherTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: "id"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "id"
-            KeyType: "HASH"
-        ProvisionedThroughput:
-          ReadCapacityUnits: "5"
-          WriteCapacityUnits: "5"
-        TableName: "KindergartenTeacherTable"
-    KindergartenTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: "id"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "id"
-            KeyType: "HASH"
-        ProvisionedThroughput:
-          ReadCapacityUnits: "5"
-          WriteCapacityUnits: "5"
-        TableName: "KindergartenTable"
-    KindergartenChildTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: "id"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "id"
-            KeyType: "HASH"
-        ProvisionedThroughput:
-          ReadCapacityUnits: "5"
-          WriteCapacityUnits: "5"
-        TableName: "KindergartenChildTable"
-    AttendanceTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: "child_id"
-            AttributeType: "S"
-          - AttributeName: "date"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "child_id"
-            KeyType: "HASH"
-          - AttributeName: "date"
-            KeyType: "RANGE"
-        ProvisionedThroughput:
-          ReadCapacityUnits: "5"
-          WriteCapacityUnits: "5"
-        TableName: "AttendanceTable"
-
-
+  # roles
+  - ${file(resources/iam/AttendanceRole.yml)}
+  - ${file(resources/iam/ChildrenRole.yml)}
+  - ${file(resources/iam/KindergartenRole.yml)}
+  - ${file(resources/iam/TeacherRole.yml)}
+  # dynamodb
+  - ${file(resources/dynamodb/AttendanceTable.yml)}
+  - ${file(resources/dynamodb/KindergartenChildTable.yml)}
+  - ${file(resources/dynamodb/KindergartenTable.yml)}
+  - ${file(resources/dynamodb/KindergartenTeacherTable.yml)}
+  # cognito
+#  - ${file(resources/cognito/Kindergarten-02.yml)}
 package:
   patterns:
     - '!node_modules/**'
