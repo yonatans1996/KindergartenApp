@@ -2,9 +2,10 @@ import { StyleSheet, Text, View, TextInput, Pressable  } from "react-native";
 import { useEffect, useState } from "react";
 import { faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-export default function Login() {
+export default function Login({acceptSms}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [sms, setSms] = useState('');
   const [showPassword,setShowPassword] = useState(false);
   var poolData = {
 	UserPoolId: 'us-east-1_ZjbeuItjC', 
@@ -27,20 +28,30 @@ export default function Login() {
         <View style={styles.passwordWrapper}> 
     
           <TextInput  style={styles.textInput}
-        placeholder="סיסמה"
-        onChangeText={password => setPassword(password)}
-        secureTextEntry={showPassword}
-        defaultValue={password}>{}</TextInput>
-         </View>
-         <FontAwesomeIcon
-                icon={showPassword? faEye : faEyeSlash}
-                style={{paddingTop:40}}
-                color={showPassword ? "gray" : "#007AFF"}
-                size={20}
-                onPress={()=>setShowPassword(!showPassword)}
+            placeholder="סיסמה"
+            onChangeText={password => setPassword(password)}
+            secureTextEntry={showPassword}
+            defaultValue={password}>{}</TextInput>
+          <FontAwesomeIcon
+            icon={showPassword? faEye : faEyeSlash}
+            style={{paddingTop:40}}
+            color={showPassword ? "gray" : "#007AFF"}
+            size={20}
+            onPress={()=>setShowPassword(!showPassword)}
               />
+         </View>
+        <TextInput  style={styles.textInput}
+          placeholder="קוד סמס"
+          onChangeText={sms => setSms(sms)}
+          defaultValue={sms}>{}</TextInput>
+        <View style={styles.passwordWrapper}> 
         <Pressable style={styles.button}>
         <Text style={styles.buttonText}>כניסה</Text>
+        </Pressable>
+        </View>
+
+        <Pressable style={styles.button} onPress={()=>acceptSms(sms)}>
+        <Text style={styles.buttonText}>אישור סמס</Text>
         </Pressable>
     </View>
   );
@@ -63,6 +74,9 @@ const styles = StyleSheet.create({
   passwordWrapper:{
     width:"100%",
     alignItems:"center",
+    display:"flex",
+    flexDirection: "row",
+    justifyContent: "center"
   },
   textInput:{
       height:40,
