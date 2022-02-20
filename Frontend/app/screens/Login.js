@@ -3,28 +3,33 @@ import { useEffect, useState } from "react";
 import { faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 export default function Login({acceptSms}) {
-  const [username, setUsername] = useState('');
+  const [fname, setFname] = useState('');
+  const [lname, setLname] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sms, setSms] = useState('');
   const [showPassword,setShowPassword] = useState(false);
-  var poolData = {
-	UserPoolId: 'us-east-1_ZjbeuItjC', 
-	ClientId: '2stjdkn1fmpskfms81355bs3ie', 
-    };
 
-    const getColor = ()=>{
-        return showPassword ? "gray" : "#007AFF"
-    }
-
-  return (
+  return (  
     <View style={styles.container}>
-        <Text style={styles.h1}>
+        {/* <Text style={styles.h1}>
             התחברות / הרשמה 
         </Text>
         <TextInput  style={styles.textInput}
-        placeholder="שם משתמש"
+        placeholder="שם פרטי"
+        onChangeText={fname => setFname(fname)}
+        defaultValue={fname}>{}</TextInput>
+
+        <TextInput  style={styles.textInput}
+        placeholder="שם משפחה"
+        onChangeText={lname => setLname(lname)}
+        defaultValue={lname}>{}</TextInput>
+
+        <TextInput  style={styles.textInput}
+        placeholder="דואר אלקטרוני"
         onChangeText={username => setUsername(username)}
         defaultValue={username}>{}</TextInput>
+
         <View style={styles.passwordWrapper}> 
     
           <TextInput  style={styles.textInput}
@@ -52,7 +57,7 @@ export default function Login({acceptSms}) {
 
         <Pressable style={styles.button} onPress={()=>acceptSms(sms)}>
         <Text style={styles.buttonText}>אישור סמס</Text>
-        </Pressable>
+        </Pressable> */}
     </View>
   );
 }
