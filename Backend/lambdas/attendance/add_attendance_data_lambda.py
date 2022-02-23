@@ -1,11 +1,11 @@
 import logging
-import datetime
 
-from const import KINDERGARTEN_ID, GROUP_NUMBER, CHILD_ID, DATE, HAS_ARRIVED, EXTRA_DATA
-
+from shared.AttendanceHandler import AttendanceHandler
 
 
 def add_attendance_data(event, context):
-    logging.info(event)
+    return event
+    response = AttendanceHandler.add_attendance(child_id='test_child_id', kindergarten_id='test_kindergarten_id',
+                                                has_arrived='test_has_arrived')
 
-    return "attendance was added to database (Not really)"
+

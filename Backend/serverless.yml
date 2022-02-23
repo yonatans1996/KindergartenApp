@@ -12,6 +12,8 @@ custom:
   userPoolName: test-user-pool-name
   pythonRequirements:
     dockerizePip: non-linux
+    usePipenv: false
+
 functions:
   # child
   GetChildData:
@@ -144,6 +146,10 @@ functions:
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/attendance/**'
@@ -153,12 +159,16 @@ functions:
     events:
       - http:
           path: attendance-mock
-          method: post
+          method: posth
           integration: lambda
           cors: true
           request:
             template: ${file(./request_apigateway.yml)}
           response: ${file(./response_apigateway.yml)}
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn: ${self:custom.cognitoAuthorizerArn}
     package:
       patterns:
         - 'lambdas/attendance/**'
@@ -177,6 +187,7 @@ resources:
   - ${file(resources/dynamodb/KindergartenChildTable.yml)}
   - ${file(resources/dynamodb/KindergartenTable.yml)}
   - ${file(resources/dynamodb/KindergartenTeacherTable.yml)}
+
   # cognito
 #  - ${file(resources/cognito/Kindergarten-02.yml)}
 package:
@@ -184,8 +195,10 @@ package:
     - '!node_modules/**'
     - '!lambdas/**'
     - '!tests/**'
+    - '!resources/**'
     - 'lambdas/__init__.py'
-    - 'venv/**'
+    - 'shared/**'
+
   individually: true
 
 

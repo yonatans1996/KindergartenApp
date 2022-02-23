@@ -18,15 +18,15 @@ application/json: |
     ## "principalId": "$context.authorizer.principalId",
     ## "stage": "$context.stage",
 
-    ## "cognitoPoolClaims" : {
-    ##   "sub": "$context.authorizer.claims.sub"
-    ## },
+     "cognitoPoolClaims" : {
+       "sub": "$context.authorizer.claims.sub"
+     },
 
     #set( $map = $context.authorizer )
     "authorizer": $loop,
 
-    ## #set( $map = $input.params().header )
-    ## "headers": $loop,
+     #set( $map = $input.params().header )
+     "headers": $loop,
 
     #set( $map = $input.params().querystring )
     "querystring": $loop,

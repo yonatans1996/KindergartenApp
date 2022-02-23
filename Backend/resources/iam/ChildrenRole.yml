@@ -17,5 +17,9 @@ Resources:
               Statement:
                 - Effect: Allow
                   Action:
-                    - "*"
+                    - logs:*
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - dynamodb:*
                   Resource: "*"
