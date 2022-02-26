@@ -102,10 +102,8 @@ export default function SignUpScreen({navigation}) {
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function(result) {
-        var accessToken = result.getAccessToken().getJwtToken();
-        setUser
-        console.log("accessToken = ",accessToken);
-        console.log("REsult = ", JSON.stringify(result));
+        // var accessToken = result.getAccessToken().getJwtToken();
+        var accessToken = result.getIdToken().getJwtToken();
         console.log("login after sign up successfully");
         addTeacherToDB(accessToken)
       },
@@ -126,8 +124,9 @@ var raw = JSON.stringify({
   "first_name": data.firstName,
   "last_name": data.lastName,
   "is_admin": 1,
-  "kindergarten_id": "123",
-  "photo_link": ""
+  "kindergarten_id": 123,
+  "photo_link": "",
+  "group_number" : 1
 });
 
 var requestOptions = {
@@ -141,7 +140,7 @@ fetch("https://api.kindergartenil.com/teacher", requestOptions)
   .then(response => response.text())
   .then(result => {
     console.log("added teach to db succsessfuly");
-    setUser({accessToken, first_name: data.firstName, last_name: data.last_name})
+    setUser({accessToken})
   })
   .catch(error => console.log('error', error));
   }

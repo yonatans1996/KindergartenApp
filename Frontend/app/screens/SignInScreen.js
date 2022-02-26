@@ -56,7 +56,7 @@ export default function SignInScreen({navigation}) {
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function(result) {
-        var accessToken = result.getAccessToken().getJwtToken();
+        var accessToken = result.getIdToken().getJwtToken();
         setUser
         console.log("accessToken = ",accessToken);
         console.log("REsult = ", JSON.stringify(result));

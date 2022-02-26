@@ -5,23 +5,23 @@ import Children from "../components/Children";
 import { AuthContext } from "./AuthContext";
 export default function HomeScreen() {
   const [children, setChildren] = useState([]);
-  const [teacher, setTeacher] = useState({first_name:"...."});
+  const [teacher, setTeacher] = useState();
   const {user, setUser} = useContext(AuthContext);
   useEffect(() => {
-    var requestOptions = {
-      method: "GET",
-      redirect: "follow",
-    };
+    // var requestOptions = {
+    //   method: "GET",
+    //   redirect: "follow",
+    // };
 
-    fetch(
-      "https://57o33wv6q6.execute-api.us-east-1.amazonaws.com/dev/kindergarten-mock",
-      requestOptions
-    )
-      .then((response) => response.json())
-      .then((result) => {
-        setChildren(result.children);
-      })
-      .catch((error) => console.log("error", error));
+    // fetch(
+    //   "https://57o33wv6q6.execute-api.us-east-1.amazonaws.com/dev/kindergarten-mock",
+    //   requestOptions
+    // )
+    //   .then((response) => response.json())
+    //   .then((result) => {
+    //     setChildren(result.children);
+    //   })
+    //   .catch((error) => console.log("error", error));
       var myHeaders = new Headers();
 myHeaders.append("Authorization", user.accessToken);
 
@@ -30,19 +30,13 @@ var requestOptions = {
   headers: myHeaders,
   redirect: 'follow'
 };
-if(!user.first_name){
-  fetch("https://api.kindergartenil.com/teacher", requestOptions)
-  .then(response => response.text())
-  .then(result => {
-    setTeacher(result);
-    console.log(JSON.stringify(result))
-  })
-  .catch(error => console.log('error', error));
-}
-else{
-  setTeacher({first_name: user.first_name})
-}
 
+  fetch("https://api.kindergartenil.com/teacher", requestOptions)
+  .then(response => response.json())
+  .then(result => {
+    setUser({...result, accessToken: user.accessToken});
+  })
+  .catch(error => console.log('error2', error));
   
       
   }, []);
@@ -57,7 +51,7 @@ else{
             uri: "https://st2.depositphotos.com/1472273/8613/v/950/depositphotos_86130252-stock-illustration-multicolor-kindergarten-logo.jpg",
           }}
         />
-        <Text style={{ paddingTop: 20, ...styles.h2 }}>הגננת {teacher.first_name}</Text>
+        <Text style={{ paddingTop: 20, ...styles.h2 }}>הגננת {user? user.first_name: "..."}</Text>
       </View>
       <Children children={children} />
     </View>

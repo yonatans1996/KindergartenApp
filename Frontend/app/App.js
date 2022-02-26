@@ -14,7 +14,7 @@ var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 import RootStack from "./screens/RootStackScreen";
 export default function App() {
-  const [user, setUser] = useState({ accessToken: "" });
+  const [user, setUser] = useState({});
   var cognitoUser = {};
   var poolData = {
     UserPoolId: "us-east-1_PokjeshX3", // Your user pool id here
