@@ -1,90 +1,119 @@
-import { StatusBar } from 'expo-status-bar';
-import { Dimensions, StyleSheet, Text, View, Image } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import MaterialIcons from   'react-native-vector-icons'
-import * as Animatable  from 'react-native-animatable';
+import { StatusBar } from "expo-status-bar";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import MaterialIcons from "react-native-vector-icons";
+import * as Animatable from "react-native-animatable";
 
-export default function SplashScreen({navigation}) {
+export default function SplashScreen({ navigation }) {
   return (
     <View style={styles.container}>
-        <View style = {styles.header}>
+      <View style={styles.header}>
         <Animatable.Image
           duration={1500}
           animation="bounceIn"
           style={styles.logo}
-          resizeMode= "stretch"
+          resizeMode="stretch"
           source={{
             uri: "https://st2.depositphotos.com/1472273/8613/v/950/depositphotos_86130252-stock-illustration-multicolor-kindergarten-logo.jpg",
           }}
         />
-        </View>
-        <Animatable.View animation="fadeInUpBig" style = {styles.footer}>
-          <Text style={styles.title}>Welcome to our app!</Text>
-          <Text style={styles.text}>Sign in with account</Text>
+      </View>
+      <Animatable.View animation="fadeInUpBig" style={styles.footer}>
+        <Text style={styles.title}>ברוכים הבאים!</Text>
+        <Text style={styles.text}>התחברו או הירשמו</Text>
+        <View style={styles.buttons}>
           <View style={styles.button}>
-          <TouchableOpacity onPress={()=>navigation.navigate("SignInScreen")}>
-            <LinearGradient colors={['#08d4c4', '#01ab9d']} style={styles.signIn}>
-              <Text style={styles.textSign}>Get started!</Text>
-              <Ionicons name='arrow-forward' color="#fff" size={20} />
-            </LinearGradient>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SignUpScreen")}
+            >
+              <LinearGradient
+                colors={["#08d4c4", "#01ab9d"]}
+                style={styles.signIn}
+              >
+                <Ionicons name="add" color="#fff" size={20} />
+                <Text style={styles.textSign}>הרשמה</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
-        </Animatable.View>
+          <View style={styles.button}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SignInScreen")}
+            >
+              <LinearGradient
+                colors={["#08d4c4", "#01ab9d"]}
+                style={styles.signIn}
+              >
+                <Ionicons name="arrow-back" color="#fff" size={20} />
+                <Text style={styles.textSign}>כניסה</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Animatable.View>
     </View>
   );
 }
 
-
-const {height} = Dimensions.get("screen");
+const { height } = Dimensions.get("screen");
 const height_logo = height * 0.28;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: '#009387'
+    flex: 1,
+    backgroundColor: "#009387",
   },
   header: {
-      flex: 2,
-      justifyContent: 'center',
-      alignItems: 'center'
+    flex: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   footer: {
-      flex: 1,
-      backgroundColor: '#fff',
-      borderTopLeftRadius: 30,
-      borderTopRightRadius: 30,
-      paddingVertical: 50,
-      paddingHorizontal: 30
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingVertical: 50,
+    paddingHorizontal: 30,
   },
   logo: {
-      width: height_logo,
-      height: height_logo
+    width: height_logo,
+    height: height_logo,
   },
   title: {
-      color: '#05375a',
-      fontSize: 30,
-      fontWeight: 'bold'
+    color: "#05375a",
+    fontSize: 30,
+    fontWeight: "bold",
   },
   text: {
-      color: 'grey',
-      marginTop:5
+    color: "grey",
+    marginTop: 5,
   },
   button: {
-      alignItems: 'flex-end',
-      marginTop: 30
+    alignItems: "flex-end",
+    marginTop: 30,
   },
   signIn: {
-      width: 150,
-      height: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 50,
-      flexDirection: 'row'
+    width: 150,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    flexDirection: "row",
   },
   textSign: {
-      color: 'white',
-      fontWeight: 'bold'
-  }
+    color: "white",
+    fontWeight: "bold",
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
 });

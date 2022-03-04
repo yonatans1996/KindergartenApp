@@ -1,59 +1,99 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
 import { useEffect, useState, useContext } from "react";
 import Children from "../components/Children";
 import { AuthContext } from "./AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import AddChildModal from "../components/AddChildModal";
 export default function HomeScreen() {
   const [children, setChildren] = useState([]);
   const [teacher, setTeacher] = useState();
-  const {user, setUser} = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+  const [modalVisible, setModalVisible] = useState(false);
+  const getChildren = () => {
+    console.log("access token = ", user.accessToken);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+      headers: myHeaders,
+    };
+
+    fetch(
+      "https://api.kindergartenil.com/kindergarten/group_chidren",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("children response = ", result);
+        setChildren(result);
+      })
+      .catch((error) => console.log("error", error));
+  };
   useEffect(() => {
-    // var requestOptions = {
-    //   method: "GET",
-    //   redirect: "follow",
-    // };
+    getChildren();
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
 
-    // fetch(
-    //   "https://57o33wv6q6.execute-api.us-east-1.amazonaws.com/dev/kindergarten-mock",
-    //   requestOptions
-    // )
-    //   .then((response) => response.json())
-    //   .then((result) => {
-    //     setChildren(result.children);
-    //   })
-    //   .catch((error) => console.log("error", error));
-      var myHeaders = new Headers();
-myHeaders.append("Authorization", user.accessToken);
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
 
-var requestOptions = {
-  method: 'GET',
-  headers: myHeaders,
-  redirect: 'follow'
-};
-
-  fetch("https://api.kindergartenil.com/teacher", requestOptions)
-  .then(response => response.json())
-  .then(result => {
-    setUser({...result, accessToken: user.accessToken});
-  })
-  .catch(error => console.log('error2', error));
-  
-      
+    fetch("https://api.kindergartenil.com/teacher", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("result = ", result);
+        setUser({ ...result, accessToken: user.accessToken });
+      })
+      .catch((error) => console.log("error2", error));
   }, []);
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <AddChildModal
+          setModalVisible={setModalVisible}
+          modalVisible={modalVisible}
+          accessToken={user.accessToken}
+          getChildren={getChildren}
+        />
+      </Modal>
       <View style={styles.header}>
         <Text style={styles.h1}>גן רימון</Text>
-        <Image
-          style={{ width: 80, height: 80 }}
-          source={{
-            uri: "https://st2.depositphotos.com/1472273/8613/v/950/depositphotos_86130252-stock-illustration-multicolor-kindergarten-logo.jpg",
-          }}
-        />
-        <Text style={{ paddingTop: 20, ...styles.h2 }}>הגננת {user? user.first_name: "..."}</Text>
+        <Text style={styles.h2}>שלום {user ? user.first_name : "..."}</Text>
       </View>
-      <Children children={children} />
+      <View style={styles.footer}>
+        <Children children={children} />
+        <View style={styles.button}>
+          <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+            <LinearGradient
+              colors={["#08d4c4", "#01ab9d"]}
+              style={styles.signIn}
+            >
+              <Ionicons name="add" color="#fff" size={20} />
+              <Text style={styles.textSign}>הוספת ילד חדש</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
+        <Text
+          style={{ textAlign: "center", paddingTop: 15 }}
+          onPress={() => setUser({})}
+        >
+          התנתקות
+        </Text>
+      </View>
     </View>
   );
 }
@@ -61,17 +101,34 @@ var requestOptions = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "flex-start",
+    backgroundColor: "#009387",
   },
   header: {
-    backgroundColor: "#cc6666",
-    width: "100%",
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    padding: 30,
-    paddingTop: 50,
-    paddingBottom: 10,
+  },
+  footer: {
+    flex: 3,
+    justifyContent: "flex-start",
+    alignContent: "center",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingVertical: 50,
+    paddingHorizontal: 30,
+  },
+  textSign: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  signIn: {
+    width: 150,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    flexDirection: "row",
   },
   h1: {
     fontSize: 30,
@@ -80,7 +137,12 @@ const styles = StyleSheet.create({
   },
   h2: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "white",
+  },
+  button: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 30,
   },
 });
