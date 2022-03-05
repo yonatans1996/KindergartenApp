@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   TouchableOpacity,
+  SafeAreaView,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -66,14 +67,10 @@ export default function AddChildModal({
     // console.log(Dimensions.get("window"));
   }, []);
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={"height"} enabled style={styles.container}>
       <View style={styles.modal}>
-        <ScrollView>
-          <View style={styles.header}>
-            <Text style={styles.text_header}>הוספת ילד חדש</Text>
-          </View>
-
-          <Animatable.View style={styles.footer} animation="fadeInUpBig">
+        <Animatable.View style={styles.footer} animation="fadeInUpBig">
+          <ScrollView>
             <Text style={styles.text_footer}>שם פרטי</Text>
             <View style={styles.action}>
               <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
@@ -124,41 +121,52 @@ export default function AddChildModal({
                 maxLength={10}
               />
             </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => submitChild()}
-            >
-              <LinearGradient
-                colors={["#08d4c4", "#01ab9d"]}
-                style={styles.signIn}
+            <View style={styles.buttons}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => submitChild()}
               >
-                <Text style={[styles.textSign, { color: "white" }]}>הוספה</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.singUp}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <Text style={[styles.textSign, { color: "#009387" }]}>ביטול</Text>
-            </TouchableOpacity>
-          </Animatable.View>
-        </ScrollView>
+                <LinearGradient
+                  colors={["#08d4c4", "#01ab9d"]}
+                  style={styles.signIn}
+                >
+                  <Text style={[styles.textSign, { color: "white" }]}>
+                    הוספה
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button]}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <View
+                  style={[
+                    styles.signIn,
+                    { borderWidth: 2, borderColor: "red" },
+                  ]}
+                >
+                  <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </Animatable.View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 const windowDimensions = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: "auto",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modal: {
     width: windowDimensions.width - 50,
-    height: windowDimensions.height * 0.8,
+    height: windowDimensions.height * 0.63,
+    position: "absolute",
   },
   header: {
     flex: 1,
@@ -174,6 +182,10 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 20,
     paddingVertical: 30,
+  },
+  buttons: {
+    justifyContent: "space-around",
+    flexDirection: "row-reverse",
   },
   text_header: {
     color: "#fff",
@@ -210,7 +222,8 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    marginTop: 50,
+    marginTop: 20,
+    width: 100,
   },
   signIn: {
     width: "100%",

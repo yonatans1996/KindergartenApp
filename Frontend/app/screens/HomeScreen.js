@@ -1,5 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Modal,
+  TouchableOpacity,
+  RefreshControl,
+  ScrollView,
+} from "react-native";
+import React from "react";
 import { useEffect, useState, useContext } from "react";
 import Children from "../components/Children";
 import { AuthContext } from "./AuthContext";
@@ -7,12 +16,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AddChildModal from "../components/AddChildModal";
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = React.useState(false);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getChildren();
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
   const [children, setChildren] = useState([]);
   const [teacher, setTeacher] = useState();
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
   const getChildren = () => {
-    console.log("access token = ", user.accessToken);
+    setRefreshing(true);
+    // console.log("access token = ", user.accessToken);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {
@@ -27,10 +46,11 @@ export default function HomeScreen() {
     )
       .then((response) => response.json())
       .then((result) => {
-        console.log("children response = ", result);
+        console.log("got all children ");
         setChildren(result);
       })
       .catch((error) => console.log("error", error));
+    setRefreshing(false);
   };
   useEffect(() => {
     getChildren();
@@ -74,7 +94,23 @@ export default function HomeScreen() {
         <Text style={styles.h2}>שלום {user ? user.first_name : "..."}</Text>
       </View>
       <View style={styles.footer}>
-        <Children children={children} />
+        <View style={styles.swipe}>
+          <Ionicons name="swap-vertical" color="black" size={20} />
+          <Text>החליקו למעלה לרענון</Text>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollView}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <Children
+            children={children}
+            accessToken={user.accessToken}
+            getChildren={getChildren}
+          />
+        </ScrollView>
         <View style={styles.button}>
           <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
             <LinearGradient
@@ -85,14 +121,13 @@ export default function HomeScreen() {
               <Text style={styles.textSign}>הוספת ילד חדש</Text>
             </LinearGradient>
           </TouchableOpacity>
+          <Text
+            style={{ textAlign: "center", paddingTop: 15 }}
+            onPress={() => setUser({})}
+          >
+            התנתקות
+          </Text>
         </View>
-
-        <Text
-          style={{ textAlign: "center", paddingTop: 15 }}
-          onPress={() => setUser({})}
-        >
-          התנתקות
-        </Text>
       </View>
     </View>
   );
@@ -109,18 +144,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footer: {
-    flex: 3,
-    justifyContent: "flex-start",
-    alignContent: "center",
+    display: "flex",
+    flex: 4,
     backgroundColor: "#fff",
+    justifyContent: "space-between",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingVertical: 50,
-    paddingHorizontal: 30,
+    paddingVertical: 20,
+    paddingHorizontal: 5,
   },
   textSign: {
     color: "white",
     fontWeight: "bold",
+  },
+  swipe: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: -15,
+    marginBottom: 5,
   },
   signIn: {
     width: 150,
@@ -142,7 +183,6 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    justifyContent: "center",
     marginTop: 30,
   },
 });
