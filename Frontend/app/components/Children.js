@@ -62,6 +62,7 @@ function Children({ children, accessToken, getChildren }) {
     <Child child={item} handleChildPress={handleChildPress} />
   );
 
+
   return (
     <View style={styles.childrenContainer}>
       {children && (
@@ -72,6 +73,7 @@ function Children({ children, accessToken, getChildren }) {
           numColumns={3}
           renderItem={renderChildren}
           keyExtractor={(item) => item.id}
+          scrollEnabled={false}
         />
       )}
       {/* {children &&

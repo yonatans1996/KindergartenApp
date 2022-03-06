@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ScrollView,
+  LogBox
 } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
@@ -53,6 +54,7 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
   useEffect(() => {
+    LogBox.ignoreLogs(["VirtualizedLists should never be nested"])
     getChildren();
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
@@ -89,21 +91,23 @@ export default function HomeScreen() {
           getChildren={getChildren}
         />
       </Modal>
+
       <View style={styles.header}>
         <Text style={styles.h1}>גן רימון</Text>
         <Text style={styles.h2}>שלום {user ? user.first_name : "..."}</Text>
       </View>
+
       <View style={styles.footer}>
         <View style={styles.swipe}>
           <Ionicons name="swap-vertical" color="black" size={20} />
           <Text>החליקו למעלה לרענון</Text>
         </View>
-
         <ScrollView
           contentContainerStyle={styles.scrollView}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
+          nestedScrollEnabled
         >
           <Children
             children={children}
