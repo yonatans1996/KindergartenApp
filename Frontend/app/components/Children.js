@@ -12,7 +12,7 @@ import {
 const Child = ({ child, handleChildPress }) => (
   <TouchableOpacity
     key={child.id}
-    onPress={() => handleChildPress(child.id, child.is_present)}
+    onPress={() => handleChildPress(child.child_id, child.is_present)}
     style={[
       styles.childrenBox,
       { backgroundColor: child.is_present ? "green" : "red" },
@@ -61,7 +61,6 @@ function Children({ children, accessToken, getChildren }) {
   const renderChildren = ({ item }) => (
     <Child child={item} handleChildPress={handleChildPress} />
   );
-
 
   return (
     <View style={styles.childrenContainer}>
