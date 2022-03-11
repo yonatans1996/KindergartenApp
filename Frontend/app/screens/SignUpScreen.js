@@ -1,34 +1,34 @@
 import { StatusBar } from "expo-status-bar";
 import {
-  Dimensions,
   Platform,
   StyleSheet,
   Text,
   View,
-  Image,
   TextInput,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { RadioButton } from "react-native-paper";
 import { useState, useContext } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import * as React from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import MaterialIcons from "react-native-vector-icons";
 import {
   faUser,
   faUsers,
   faLock,
   faPhone,
+  faIdCard,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import Feather from "react-native-vector-icons/Feather";
 import * as Animatable from "react-native-animatable";
-import { text } from "@fortawesome/fontawesome-svg-core";
 import md5 from "react-native-md5";
 import { AuthContext } from "./AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreen({ navigation }) {
+  const [checked, setChecked] = React.useState("first");
+
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -36,9 +36,13 @@ export default function SignUpScreen({ navigation }) {
     checkLastName: false,
     checkPhone: false,
     showPass: false,
+    checkKinderName: false,
     firstName: "",
     lastName: "",
     phone: "",
+    kinderName: "",
+    kindergartenId: null,
+    checkKindergartenId: false,
   });
   const { user, setUser } = useContext(AuthContext);
   const firstNameInputChange = (val) => {
@@ -68,12 +72,26 @@ export default function SignUpScreen({ navigation }) {
   const showPassword = () => {
     setData({ ...data, showPass: !data.showPass });
   };
-
+  const newKindergartenHandle = (val) => {
+    let checked = val.length === 8;
+    setData({ ...data, kindergartenId: val, checkKindergartenId: checked });
+  };
+  const kinderNameHandle = (val) => {
+    let checked = val.length > 1;
+    setData({ ...data, kinderName: val, checkKinderName: checked });
+  };
   const handleRegister = () => {
-    if (!data.checkFirstName || !data.checkLastName || !data.checkPhone) {
+    if (
+      !data.checkFirstName ||
+      !data.checkLastName ||
+      !data.checkPhone ||
+      (checked === "second" && !data.checkKindergartenId) ||
+      (checked === "first" && !data.checkKinderName)
+    ) {
       alert("אחד השדות לא מלאים כמו שצריך");
       return;
     }
+
     console.log("registering");
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
@@ -132,15 +150,16 @@ export default function SignUpScreen({ navigation }) {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
-
+    if (checked === "first") {
+      data.kindergartenId = null;
+    }
     var raw = JSON.stringify({
       first_name: data.firstName,
       last_name: data.lastName,
       is_admin: "1",
-      kindergarten_id: null,
-      photo_link: "",
+      kindergarten_id: data.kindergartenId,
       group_number: "1",
-      kindergarten_name: "הגן החדש שלי",
+      kindergarten_name: data.kinderName,
     });
 
     var requestOptions = {
@@ -232,6 +251,65 @@ export default function SignUpScreen({ navigation }) {
               onPress={() => showPassword()}
             />
           </View>
+          <View style={[styles.radioBox, { marginTop: 35 }]}>
+            <RadioButton
+              value="first"
+              status={checked === "first" ? "checked" : "unchecked"}
+              onPress={() => setChecked("first")}
+            />
+            <Text
+              onPress={() => setChecked("first")}
+              style={styles.text_footer}
+            >
+              יצירת גן חדש
+            </Text>
+          </View>
+          {checked === "first" && (
+            <Animatable.View style={styles.action} animation="slideInUp">
+              <TextInput
+                placeholder="שם הגן"
+                style={[styles.textInput, { marginTop: 0 }]}
+                autoCapitalize="none"
+                onChangeText={(val) => kinderNameHandle(val)}
+              />
+              {data.checkKinderName ? (
+                <Animatable.View animation="bounceIn">
+                  <Feather name="check-circle" color="green" size={20} />
+                </Animatable.View>
+              ) : null}
+            </Animatable.View>
+          )}
+
+          <View style={styles.radioBox}>
+            <RadioButton
+              value="first"
+              status={checked === "second" ? "checked" : "unchecked"}
+              onPress={() => setChecked("second")}
+            />
+            <Text
+              onPress={() => setChecked("second")}
+              style={styles.text_footer}
+            >
+              התחברות לגן קיים
+            </Text>
+          </View>
+          {checked === "second" && (
+            <Animatable.View style={styles.action} animation="slideInDown">
+              <TextInput
+                placeholder="מספר מזהה של הגן"
+                style={[styles.textInput, { marginTop: 0 }]}
+                autoCapitalize="none"
+                maxLength={8}
+                onChangeText={(val) => newKindergartenHandle(val)}
+              />
+              {data.checkKindergartenId ? (
+                <Animatable.View animation="bounceIn">
+                  <Feather name="check-circle" color="green" size={20} />
+                </Animatable.View>
+              ) : null}
+            </Animatable.View>
+          )}
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleRegister()}
@@ -287,10 +365,10 @@ const styles = StyleSheet.create({
   },
   action: {
     flexDirection: "row",
-    marginTop: 10,
+    marginTop: 0,
     borderBottomWidth: 1,
     borderBottomColor: "#f2f2f2",
-    paddingBottom: 5,
+    paddingBottom: 0,
   },
   actionError: {
     flexDirection: "row",
@@ -333,5 +411,10 @@ const styles = StyleSheet.create({
   textSign: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  radioBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

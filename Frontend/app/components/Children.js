@@ -4,14 +4,15 @@ import {
   Text,
   View,
   Image,
-  ScrollView,
+  Modal,
   FlatList,
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
+import ChildEditModal from "./ChildEditModal";
 const Child = ({ child, handleChildPress }) => (
   <TouchableOpacity
-    key={child.id}
+    key={child.child_id}
     onPress={() => handleChildPress(child.child_id, child.is_present)}
     style={[
       styles.childrenBox,
@@ -21,41 +22,33 @@ const Child = ({ child, handleChildPress }) => (
     <Image
       style={{ width: 80, height: 80, resizeMode: "contain" }}
       source={{
-        uri: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
+        uri: child.photo_link
+          ? child.photo_link
+          : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
       }}
     />
     <Text style={{ color: "white" }}>{child.first_name}</Text>
+    <Text style={{ color: "white" }}>{child.last_name}</Text>
   </TouchableOpacity>
 );
 function Children({ children, accessToken, getChildren }) {
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [childEditModal, setChildEditModal] = useState(false);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getChildren();
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
   const [selectedId, setSelectedId] = useState(null);
   useEffect(() => {
     console.log("Render children component");
   }, []);
   const handleChildPress = (id, currentStatus) => {
     setSelectedId(id);
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", accessToken);
-    myHeaders.append("Content-Type", "application/json");
-    var raw = JSON.stringify({
-      id: id,
-      is_present: !currentStatus,
-    });
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch("https://api.kindergartenil.com/attendance", requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        console.log("child id ", id, " updated successfully");
-        getChildren();
-      })
-      .catch((error) => console.log("error", error));
+    setChildEditModal(!childEditModal);
   };
 
   const renderChildren = ({ item }) => (
@@ -64,29 +57,36 @@ function Children({ children, accessToken, getChildren }) {
 
   return (
     <View style={styles.childrenContainer}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={childEditModal}
+        onRequestClose={() => {
+          setChildEditModal(!childEditModal);
+        }}
+      >
+        <ChildEditModal
+          childEditModal={childEditModal}
+          setChildEditModal={setChildEditModal}
+          accessToken={accessToken}
+          getChildren={getChildren}
+          childrenInfo={children[selectedId]}
+          id={selectedId}
+        />
+      </Modal>
       {children && (
         <FlatList
           extraData={selectedId}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           contentContainerStyle={styles.flatlist}
           data={children}
           numColumns={3}
           renderItem={renderChildren}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false}
+          keyExtractor={(item) => item.child_id}
         />
       )}
-      {/* {children &&
-          children.map((child) => (
-            <View key={child.id} style={styles.childrenBox}>
-              <Image
-                style={{ width: 80, height: 80, resizeMode: "contain" }}
-                source={{
-                  uri: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
-                }}
-              />
-              <Text>{child.first_name}</Text>
-            </View>
-          ))} */}
     </View>
   );
 }

@@ -5,12 +5,10 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,8 +40,6 @@ export default function AddChildModal({
       last_name: data.lastName,
       parent1_phone_number: data.parent1Phone,
       parent2_phone_number: data.parent2Phone,
-      photo_link:
-        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
     });
 
     var requestOptions = {

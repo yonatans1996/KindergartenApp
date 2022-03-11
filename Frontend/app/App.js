@@ -1,18 +1,12 @@
-import { StyleSheet, Text, View, StatusBar } from "react-native";
+import { StyleSheet, StatusBar } from "react-native";
 import Tabs from "./navigation/Tabs";
-import Login from "./screens/Login";
 import RootStackScreen from "./screens/RootStackScreen";
-import {
-  NavigationContainer,
-  createDrawerNavigator,
-} from "@react-navigation/native";
-import { useContext, useEffect, useState } from "react";
-import * as AWS from "aws-sdk/global";
-import md5 from "react-native-md5";
+import { NavigationContainer } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import { Provider as PaperProvider } from "react-native-paper";
 import { AuthContext } from "./screens/AuthContext";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
-import RootStack from "./screens/RootStackScreen";
 export default function App() {
   const [user, setUser] = useState({});
   var cognitoUser = {};
@@ -33,20 +27,20 @@ export default function App() {
 
   useEffect(() => {}, []);
   return (
-    <AuthContext.Provider value={{user, setUser}}>
+    <AuthContext.Provider value={{ user, setUser }}>
       {user.accessToken ? (
         <NavigationContainer>
           <Tabs />
         </NavigationContainer>
       ) : (
-
+        <PaperProvider>
           <NavigationContainer>
             <StatusBar backgroundColor="#009387" barStyle="light-content" />
             <RootStackScreen />
           </NavigationContainer>
-
+        </PaperProvider>
       )}
-      </AuthContext.Provider>
+    </AuthContext.Provider>
   );
 }
 

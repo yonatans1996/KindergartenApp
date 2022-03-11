@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ScrollView,
-  LogBox
+  LogBox,
 } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
@@ -17,22 +17,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AddChildModal from "../components/AddChildModal";
 export default function HomeScreen() {
-  const [refreshing, setRefreshing] = React.useState(false);
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    getChildren();
-    wait(2000).then(() => setRefreshing(false));
-  }, []);
-  const wait = (timeout) => {
-    return new Promise((resolve) => setTimeout(resolve, timeout));
-  };
   const [children, setChildren] = useState([]);
-  const [teacher, setTeacher] = useState();
+  const [teacher, setTeacher] = useState("...");
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
   const getChildren = () => {
-    setRefreshing(true);
-    // console.log("access token = ", user.accessToken);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {
@@ -51,10 +40,8 @@ export default function HomeScreen() {
         setChildren(result);
       })
       .catch((error) => console.log("error", error));
-    setRefreshing(false);
   };
   useEffect(() => {
-    LogBox.ignoreLogs(["VirtualizedLists should never be nested"])
     getChildren();
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
@@ -68,10 +55,18 @@ export default function HomeScreen() {
     fetch("https://api.kindergartenil.com/teacher", requestOptions)
       .then((response) => response.json())
       .then((result) => {
-        console.log("result = ", result);
+        console.log("get teacher result = ", result);
         setUser({ ...result, accessToken: user.accessToken });
       })
       .catch((error) => console.log("error2", error));
+
+    fetch("https://api.kindergartenil.com/kindergarten/info", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("get kindergarden info result = ", result);
+        setTeacher(result.kindergarten_name);
+      })
+      .catch((error) => console.log("get kindergarden info error = ", error));
   }, []);
 
   return (
@@ -93,7 +88,7 @@ export default function HomeScreen() {
       </Modal>
 
       <View style={styles.header}>
-        <Text style={styles.h1}>גן רימון</Text>
+        <Text style={styles.h1}>גן {teacher}</Text>
         <Text style={styles.h2}>שלום {user ? user.first_name : "..."}</Text>
       </View>
 
@@ -102,19 +97,12 @@ export default function HomeScreen() {
           <Ionicons name="swap-vertical" color="black" size={20} />
           <Text>החליקו למעלה לרענון</Text>
         </View>
-        <ScrollView
-          contentContainerStyle={styles.scrollView}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          nestedScrollEnabled
-        >
-          <Children
-            children={children}
-            accessToken={user.accessToken}
-            getChildren={getChildren}
-          />
-        </ScrollView>
+        <Children
+          children={children}
+          accessToken={user.accessToken}
+          getChildren={getChildren}
+        />
+
         <View style={styles.button}>
           <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
             <LinearGradient

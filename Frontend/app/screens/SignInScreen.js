@@ -70,7 +70,6 @@ export default function SignInScreen({ navigation }) {
         console.log("accessToken = ", accessToken);
         console.log("REsult = ", JSON.stringify(result));
         setUser({ accessToken });
-        alert("login successfully");
       },
 
       onFailure: function (err) {
