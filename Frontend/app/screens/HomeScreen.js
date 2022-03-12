@@ -21,7 +21,15 @@ export default function HomeScreen() {
   const [teacher, setTeacher] = useState("...");
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
-  const getChildren = () => {
+  const getChildren = (newChild = null) => {
+    if (newChild) {
+      let tempChildren = children.map((child) =>
+        child.child_id !== newChild.child_id ? child : newChild
+      );
+
+      setChildren(tempChildren);
+      return;
+    }
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {

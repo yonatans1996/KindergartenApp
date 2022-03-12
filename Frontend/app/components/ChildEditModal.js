@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ImageBackground,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
 import * as ImagePicker from "expo-image-picker";
@@ -19,6 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as FileSystem from "expo-file-system";
 import base64 from "react-native-base64";
 import axios from "axios";
+import * as mime from "react-native-mime-types";
 
 export default function AddChildModal({
   childEditModal,
@@ -28,7 +29,7 @@ export default function AddChildModal({
   childInfo,
 }) {
   const [image, setImage] = useState(null);
-  const [isUpload,setUpload] = useState(false);
+  const [isUpload, setUpload] = useState(false);
   const submitChild = () => {
     setChildEditModal(!childEditModal);
   };
@@ -60,44 +61,35 @@ export default function AddChildModal({
     )
       .then((response) => response.json())
       .catch((error) => console.log("error getting s3 link. ", error));
-    
+
     console.log("s3 link = ", s3Param.url);
-    console.log("DEBUG2=",s3Param.fields.key,  s3Param.fields.AWSAccessKeyId , s3Param.fields.policy,  s3Param.fields.signature)
-    const imageFile = await getBlob(image.uri);
-    
-    console.log("S3Obj = ",s3Param);
+
     var formdata = new FormData();
     formdata.append("key", s3Param.fields.key);
     formdata.append("AWSAccessKeyId", s3Param.fields.AWSAccessKeyId);
     formdata.append("policy", s3Param.fields.policy);
     formdata.append("signature", s3Param.fields.signature);
-    formdata.append("file",imageFile, "test");
-    // formdata.append('file', {
-    //   uri: image.uri,
-    //   type: 'image/png',
-    //   name: 'image.png',
-    // });
- 
-    
+    const newImageUri = "file:///" + image.uri.split("file:/").join("");
+    formdata.append("file", {
+      uri: newImageUri,
+      type: mime.lookup(newImageUri),
+      name: newImageUri.split("/").pop(),
+    });
     var requestOptions = {
-      method: 'POST',
+      method: "POST",
+      redirect: "follow",
       body: formdata,
-      redirect: 'follow',
     };
-    
-    fetch("https://kindergarten-photos.s3.amazonaws.com/", requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
-      .catch(error => console.log('error', error));
-      setUpload(false);
-      
-  };
 
-  const getBlob = async (fileUri) => {
-    const resp = await fetch(fileUri);
-    const imageBody = await resp.blob();
-    console.log(imageBody)
-    return imageBody;
+    fetch("https://kindergarten-photos.s3.amazonaws.com/", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        console.log("uploaded image to s3. " + result);
+        setUpload(false);
+        setImage(false);
+        getChildren();
+      })
+      .catch((error) => console.log("error", error));
   };
 
   const takePhotoFromGallery = async () => {
@@ -106,12 +98,11 @@ export default function AddChildModal({
       quality: 0.1,
       aspect: [4, 4],
       allowsEditing: true,
-      base64:true
+      base64: true,
     });
     console.log("image = ", image);
     setImage(image);
   };
-
 
   useEffect(() => {
     console.log("child modal open of = ", childInfo);
@@ -120,23 +111,43 @@ export default function AddChildModal({
     <View style={styles.container}>
       <View style={{ alignItems: "center" }}>
         {image && !image.cancelled ? (
-          <View style={{flexDirection:"row-reverse", alignItems:"center", width:"100%",justifyContent:"space-evenly"}}>
-            <TouchableOpacity onPress={()=>uploadToS3()}>
-            <Feather name="check-circle" color="green" size={80} />
-            </TouchableOpacity>
-          <ImageBackground
-            style={{ width: 150, height: 150, resizeMode: "cover",display:"flex",justifyContent:"flex-start" }}
-            imageStyle={{ borderRadius: 10 }}
-            source={{
-              uri: image.uri,
+          <View
+            style={{
+              flexDirection: "row-reverse",
+              alignItems: "center",
+              width: "100%",
+              justifyContent: "space-evenly",
             }}
           >
-            
-            <Text style={{textAlign:"center", fontWeight:"bold", backgroundColor: "rgba(193, 193, 193, 0.61)"}}>נא לאשר את שינוי התמונה</Text>
+            <TouchableOpacity onPress={() => uploadToS3()}>
+              <Feather name="check-circle" color="green" size={80} />
+            </TouchableOpacity>
+            <ImageBackground
+              style={{
+                width: 150,
+                height: 150,
+                resizeMode: "cover",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+              imageStyle={{ borderRadius: 10 }}
+              source={{
+                uri: image.uri,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  backgroundColor: "rgba(193, 193, 193, 0.61)",
+                }}
+              >
+                נא לאשר את שינוי התמונה
+              </Text>
             </ImageBackground>
-            
-            <TouchableOpacity onPress={()=>setImage(null)}>
-            <Feather name="x-circle" color="red" size={80} />
+
+            <TouchableOpacity onPress={() => setImage(null)}>
+              <Feather name="x-circle" color="red" size={80} />
             </TouchableOpacity>
           </View>
         ) : (
