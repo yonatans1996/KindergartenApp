@@ -2,9 +2,10 @@ module.exports = function (api) {
   api.cache(true);
   return {
     presets: ["babel-preset-expo"],
+    plugins: ["react-native-reanimated/plugin"],
     env: {
       production: {
-        plugins: ["react-native-paper/babel", "expo-camera"],
+        plugins: ["react-native-paper/babel", "expo-camera", "react-native-reanimated/plugin"],
       },
     },
   };

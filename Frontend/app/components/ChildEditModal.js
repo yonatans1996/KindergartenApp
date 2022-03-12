@@ -8,15 +8,18 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ImageBackground,
+  ActivityIndicator
 } from "react-native";
+import Feather from "react-native-vector-icons/Feather";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { faCamera } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import * as FileSystem from 'expo-file-system';
-import base64 from 'react-native-base64'
-import axios from "axios"
+import * as FileSystem from "expo-file-system";
+import base64 from "react-native-base64";
+import axios from "axios";
+
 export default function AddChildModal({
   childEditModal,
   setChildEditModal,
@@ -25,15 +28,24 @@ export default function AddChildModal({
   childInfo,
 }) {
   const [image, setImage] = useState(null);
+  const [isUpload,setUpload] = useState(false);
   const submitChild = () => {
     setChildEditModal(!childEditModal);
   };
   const takePhotoFromCamera = async () => {
-    let image = await ImagePicker.launchCameraAsync({ mediaTypes: "Images", quality:0.3 });
+    let image = await ImagePicker.launchCameraAsync({
+      mediaTypes: "Images",
+      quality: 0.1,
+      aspect: [4, 4],
+      allowsEditing: true,
+    });
 
-    // console.log("image = ", image);
+    console.log("image = ", image);
     setImage(image);
+  };
 
+  const uploadToS3 = async () => {
+    setUpload(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     var requestOptions = {
@@ -41,97 +53,148 @@ export default function AddChildModal({
       headers: myHeaders,
       redirect: "follow",
     };
-    let s3Url = await fetch(
+    let s3Param = await fetch(
       "https://api.kindergartenil.com/child/upload_photo_link?child_id=" +
         childInfo.child_id,
       requestOptions
     )
-      .then((response) => response.text())
+      .then((response) => response.json())
       .catch((error) => console.log("error getting s3 link. ", error));
-      s3Url = s3Url.replace('"', '');
-      s3Url = s3Url.replace('"', '');
-      console.log("s3 link = ",s3Url)
-      const imageBody = await getBlob(image.uri)
-      var requestOptions = {
-        method: 'PUT',
-        body: imageBody,
-        headers:{'Content-Type': ''}
-      };
+    
+    console.log("s3 link = ", s3Param.url);
+    console.log("DEBUG2=",s3Param.fields.key,  s3Param.fields.AWSAccessKeyId , s3Param.fields.policy,  s3Param.fields.signature)
+    const imageFile = await getBlob(image.uri);
+    
+    console.log("S3Obj = ",s3Param);
+    var formdata = new FormData();
+    formdata.append("key", s3Param.fields.key);
+    formdata.append("AWSAccessKeyId", s3Param.fields.AWSAccessKeyId);
+    formdata.append("policy", s3Param.fields.policy);
+    formdata.append("signature", s3Param.fields.signature);
+    formdata.append("file",imageFile, "test");
+    // formdata.append('file', {
+    //   uri: image.uri,
+    //   type: 'image/png',
+    //   name: 'image.png',
+    // });
+ 
+    
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+      redirect: 'follow',
+    };
+    
+    fetch("https://kindergarten-photos.s3.amazonaws.com/", requestOptions)
+      .then(response => response.text())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+      setUpload(false);
       
-      fetch(s3Url, requestOptions)
-        .then(response => response.text())
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error));
   };
 
   const getBlob = async (fileUri) => {
     const resp = await fetch(fileUri);
     const imageBody = await resp.blob();
+    console.log(imageBody)
     return imageBody;
-};
+  };
 
   const takePhotoFromGallery = async () => {
     let image = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "Images",
+      quality: 0.1,
+      aspect: [4, 4],
+      allowsEditing: true,
+      base64:true
     });
     console.log("image = ", image);
     setImage(image);
   };
-  
 
-  const updateAttendance = (id) => {
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", accessToken);
-    myHeaders.append("Content-Type", "application/json");
-    var raw = JSON.stringify({
-      id: id,
-      is_present: !currentStatus,
-    });
-
-    var requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: raw,
-      redirect: "follow",
-    };
-
-    fetch("https://api.kindergartenil.com/attendance", requestOptions)
-      .then((response) => response.json())
-      .then((result) => {
-        console.log("child id ", id, " updated successfully");
-        getChildren();
-      })
-      .catch((error) => console.log("error", error));
-  };
 
   useEffect(() => {
     console.log("child modal open of = ", childInfo);
-    setImage(childInfo.photo_link);
   }, []);
   return (
-    <KeyboardAvoidingView behavior={"height"} enabled style={styles.container}>
-      <ImageBackground
-        style={{ width: 80, height: 80, resizeMode: "cover" }}
-        imageStyle={{ borderRadius: 10 }}
-        source={{
-          uri: image
-            ? image.uri
-            : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
-        }}
-      >
-        {/* <View style={{flex:1, justifyContent:"center", alignItems: "center"}}>
-        <FontAwesomeIcon icon={faCamera} style={{ borderColor:"#fff", opacity: 0.8}} color="#fff" size={35} />
-        </View> */}
-      </ImageBackground>
+    <View style={styles.container}>
+      <View style={{ alignItems: "center" }}>
+        {image && !image.cancelled ? (
+          <View style={{flexDirection:"row-reverse", alignItems:"center", width:"100%",justifyContent:"space-evenly"}}>
+            <TouchableOpacity onPress={()=>uploadToS3()}>
+            <Feather name="check-circle" color="green" size={80} />
+            </TouchableOpacity>
+          <ImageBackground
+            style={{ width: 150, height: 150, resizeMode: "cover",display:"flex",justifyContent:"flex-start" }}
+            imageStyle={{ borderRadius: 10 }}
+            source={{
+              uri: image.uri,
+            }}
+          >
+            
+            <Text style={{textAlign:"center", fontWeight:"bold", backgroundColor: "rgba(193, 193, 193, 0.61)"}}>נא לאשר את שינוי התמונה</Text>
+            </ImageBackground>
+            
+            <TouchableOpacity onPress={()=>setImage(null)}>
+            <Feather name="x-circle" color="red" size={80} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <ImageBackground
+            style={{ width: 150, height: 150, resizeMode: "cover" }}
+            imageStyle={{ borderRadius: 10 }}
+            source={{
+              uri: childInfo.photo_link
+                ? childInfo.photo_link
+                : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
+            }}
+          ></ImageBackground>
+        )}
+        <ActivityIndicator size="large" color="#08d4c4" animating={isUpload} />
+        <Text style={{ color: "white", fontSize: 20, paddingTop: 5 }}>
+          {childInfo.first_name} {childInfo.last_name}
+        </Text>
+      </View>
+      <View style={{ flex: 1, width: "90%" }}>
+        <TouchableOpacity
+          onPress={() => takePhotoFromCamera()}
+          style={{ marginTop: 15 }}
+        >
+          <LinearGradient
+            colors={["#08d4c4", "#01ab9d"]}
+            style={{ borderRadius: 30 }}
+          >
+            <Text
+              style={[
+                styles.textSign,
+                { color: "white", textAlign: "center", padding: 10 },
+              ]}
+            >
+              צלם תמונה
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => takePhotoFromGallery()}
+          style={{ marginTop: 15 }}
+        >
+          <LinearGradient
+            colors={["#08d4c4", "#01ab9d"]}
+            style={{ borderRadius: 30 }}
+          >
+            <Text
+              style={[
+                styles.textSign,
+                { color: "white", textAlign: "center", padding: 10 },
+              ]}
+            >
+              בחר תמונה מגלריה
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
 
-      {image && (
-        <Image source={{ uri: image.uri }} style={{ width: 80, height: 80 }} />
-      )}
-      <Text style={{ color: "white", fontSize: 20 }}>
-        {childInfo.first_name} {childInfo.last_name}
-      </Text>
-
-      <View style={styles.button}>
+      {/* <View style={styles.button}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => takePhotoFromCamera()}
@@ -144,8 +207,8 @@ export default function AddChildModal({
             </Text>
           </LinearGradient>
         </TouchableOpacity>
-      </View>
-      <View style={styles.button}>
+      </View> */}
+      {/* <View style={styles.button}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => takePhotoFromGallery()}
@@ -159,8 +222,8 @@ export default function AddChildModal({
             </Text>
           </LinearGradient>
         </TouchableOpacity>
-      </View>
-      <View style={styles.buttons}>
+      </View> */}
+      {/* <View style={styles.buttons}>
         <TouchableOpacity style={styles.button} onPress={() => submitChild()}>
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
             <Text style={[styles.textSign, { color: "white" }]}>הוספה</Text>
@@ -174,23 +237,20 @@ export default function AddChildModal({
             <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
           </View>
         </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+      </View> */}
+    </View>
   );
 }
 const windowDimensions = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 50,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  modal: {
-    width: windowDimensions.width - 50,
-    height: windowDimensions.height * 0.63,
-    position: "absolute",
-  },
+
   header: {
     flex: 1,
     justifyContent: "flex-end",

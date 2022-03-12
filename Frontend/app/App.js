@@ -1,3 +1,4 @@
+
 import { StyleSheet, StatusBar } from "react-native";
 import Tabs from "./navigation/Tabs";
 import RootStackScreen from "./screens/RootStackScreen";

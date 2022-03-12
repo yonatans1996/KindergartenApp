@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 import { useState, useContext } from "react";
@@ -88,7 +89,7 @@ export default function SignUpScreen({ navigation }) {
       (checked === "second" && !data.checkKindergartenId) ||
       (checked === "first" && !data.checkKinderName)
     ) {
-      alert("אחד השדות לא מלאים כמו שצריך");
+      Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך")
       return;
     }
 
@@ -106,7 +107,7 @@ export default function SignUpScreen({ navigation }) {
         console.log(JSON.stringify(err));
         return;
       }
-      alert("הרשמה השולמה");
+      Alert.alert("ההרשמה הושלמה בצהלחה","")
       handleSignIn();
     });
   };
