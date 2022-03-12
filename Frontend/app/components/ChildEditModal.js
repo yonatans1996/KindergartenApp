@@ -7,20 +7,77 @@ import {
   Image,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ImageBackground,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import * as FileSystem from 'expo-file-system';
+import base64 from 'react-native-base64'
+import axios from "axios"
 export default function AddChildModal({
   childEditModal,
   setChildEditModal,
   accessToken,
   getChildren,
-  id,
-  childrenInfo,
+  childInfo,
 }) {
+  const [image, setImage] = useState(null);
   const submitChild = () => {
     setChildEditModal(!childEditModal);
   };
+  const takePhotoFromCamera = async () => {
+    let image = await ImagePicker.launchCameraAsync({ mediaTypes: "Images", quality:0.3 });
+
+    // console.log("image = ", image);
+    setImage(image);
+
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", accessToken);
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+    let s3Url = await fetch(
+      "https://api.kindergartenil.com/child/upload_photo_link?child_id=" +
+        childInfo.child_id,
+      requestOptions
+    )
+      .then((response) => response.text())
+      .catch((error) => console.log("error getting s3 link. ", error));
+      s3Url = s3Url.replace('"', '');
+      s3Url = s3Url.replace('"', '');
+      console.log("s3 link = ",s3Url)
+      const imageBody = await getBlob(image.uri)
+      var requestOptions = {
+        method: 'PUT',
+        body: imageBody,
+        headers:{'Content-Type': ''}
+      };
+      
+      fetch(s3Url, requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+  };
+
+  const getBlob = async (fileUri) => {
+    const resp = await fetch(fileUri);
+    const imageBody = await resp.blob();
+    return imageBody;
+};
+
+  const takePhotoFromGallery = async () => {
+    let image = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "Images",
+    });
+    console.log("image = ", image);
+    setImage(image);
+  };
+  
 
   const updateAttendance = (id) => {
     var myHeaders = new Headers();
@@ -48,38 +105,61 @@ export default function AddChildModal({
   };
 
   useEffect(() => {
-    // console.log("rendered child edit modal");
-    // var myHeaders = new Headers();
-    // myHeaders.append("Authorization", accessToken);
-    // var requestOptions = {
-    //   method: "GET",
-    //   headers: myHeaders,
-    //   redirect: "follow",
-    // };
-    // fetch("https://api.kindergartenil.com/children?id=" + id, requestOptions)
-    //   .then((response) => response.json())
-    //   .then((result) => {
-    //     console.log("child edit got info = ", result);
-    //     setChildInfo(result);
-    //   })
-    //   .catch((error) =>
-    //     console.log("child edit info fetch failed. error = ", error)
-    //   );
+    console.log("child modal open of = ", childInfo);
+    setImage(childInfo.photo_link);
   }, []);
   return (
     <KeyboardAvoidingView behavior={"height"} enabled style={styles.container}>
-      <Image
-        style={{ width: 80, height: 80, resizeMode: "contain" }}
+      <ImageBackground
+        style={{ width: 80, height: 80, resizeMode: "cover" }}
+        imageStyle={{ borderRadius: 10 }}
         source={{
-          uri: childInfo.photo_link
-            ? childInfo.photo_link
+          uri: image
+            ? image.uri
             : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
         }}
-      />
+      >
+        {/* <View style={{flex:1, justifyContent:"center", alignItems: "center"}}>
+        <FontAwesomeIcon icon={faCamera} style={{ borderColor:"#fff", opacity: 0.8}} color="#fff" size={35} />
+        </View> */}
+      </ImageBackground>
+
+      {image && (
+        <Image source={{ uri: image.uri }} style={{ width: 80, height: 80 }} />
+      )}
       <Text style={{ color: "white", fontSize: 20 }}>
-        {childInfo.first_name}
-        {childInfo.last_name}
+        {childInfo.first_name} {childInfo.last_name}
       </Text>
+
+      <View style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => takePhotoFromCamera()}
+        >
+          <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
+            <Text
+              style={[styles.textSign, { color: "white", textAlign: "center" }]}
+            >
+              צלם תמונה
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => takePhotoFromGallery()}
+        >
+          <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
+            <Text
+              style={[styles.textSign, { color: "white", textAlign: "center" }]}
+            >
+              {" "}
+              בחר תמונה מגלריה
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
       <View style={styles.buttons}>
         <TouchableOpacity style={styles.button} onPress={() => submitChild()}>
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>

@@ -20,7 +20,7 @@ const Child = ({ child, handleChildPress }) => (
     ]}
   >
     <Image
-      style={{ width: 80, height: 80, resizeMode: "contain" }}
+      style={{ width: 80, height: 80, resizeMode: "contain",borderRadius:10 }}
       source={{
         uri: child.photo_link
           ? child.photo_link
@@ -44,7 +44,7 @@ function Children({ children, accessToken, getChildren }) {
   };
   const [selectedId, setSelectedId] = useState(null);
   useEffect(() => {
-    console.log("Render children component");
+    console.log("Rendered children component");
   }, []);
   const handleChildPress = (id, currentStatus) => {
     setSelectedId(id);
@@ -70,8 +70,7 @@ function Children({ children, accessToken, getChildren }) {
           setChildEditModal={setChildEditModal}
           accessToken={accessToken}
           getChildren={getChildren}
-          childrenInfo={children[selectedId]}
-          id={selectedId}
+          childInfo={children.filter((child)=>child.child_id == selectedId)[0]}
         />
       </Modal>
       {children && (
@@ -104,6 +103,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "green",
+    borderRadius: 10
   },
 });
 
