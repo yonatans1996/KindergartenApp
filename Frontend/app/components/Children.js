@@ -60,8 +60,6 @@ function Children({ children, accessToken, getChildren }) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
   };
   const [selectedId, setSelectedId] = useState(null);
-  const windowWidth = Dimensions.get("screen").width;
-  const windowHeight = Dimensions.get("screen").height;
   useEffect(() => {
     console.log("Rendered children component");
   }, []);
