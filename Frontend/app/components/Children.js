@@ -8,20 +8,27 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import base64 from "react-native-base64";
 import * as Animatable from "react-native-animatable";
 import ChildEditModal from "./ChildEditModal";
-const Child = ({ child, handleChildPress, handleLongChildPress }) => (
+const Child = ({
+  child,
+  handleChildPress,
+  handleLongChildPress,
+  disablePress,
+}) => (
   <Animatable.View
     duration={500 + Math.floor(Math.random() * 3000)}
     animation="bounceIn"
     key={child.child_id}
   >
     <TouchableOpacity
-      key={child.child_id}
       onLongPress={() => handleLongChildPress(child.child_id)}
-      onPress={() => handleChildPress(child.child_id, child.is_present)}
+      disabled={disablePress}
+      onPress={() => handleChildPress(child.child_id, child.is_present, child)}
       style={[
         styles.childrenBox,
         { backgroundColor: child.is_present === "yes" ? "green" : "red" },
@@ -43,6 +50,7 @@ const Child = ({ child, handleChildPress, handleLongChildPress }) => (
 function Children({ children, accessToken, getChildren }) {
   const [refreshing, setRefreshing] = React.useState(false);
   const [childEditModal, setChildEditModal] = useState(false);
+  const [disablePress, setDisablePress] = useState(false);
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     getChildren();
@@ -52,18 +60,24 @@ function Children({ children, accessToken, getChildren }) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
   };
   const [selectedId, setSelectedId] = useState(null);
+  const windowWidth = Dimensions.get("screen").width;
+  const windowHeight = Dimensions.get("screen").height;
   useEffect(() => {
     console.log("Rendered children component");
   }, []);
-  const handleChildPress = async (id, currentStatus) => {
+  const handleChildPress = async (id, currentStatus, child) => {
+    if (disablePress) return;
+    setDisablePress(true);
     setSelectedId(id);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
 
+    currentStatus = currentStatus === "yes" ? "no" : "yes";
+    console.log("New status = ", currentStatus);
     var raw = JSON.stringify({
       id: id,
-      is_present: currentStatus === "yes" ? "no" : "yes",
+      is_present: currentStatus,
     });
 
     let requestOptions = {
@@ -72,27 +86,22 @@ function Children({ children, accessToken, getChildren }) {
       body: raw,
       redirect: "follow",
     };
-
-    fetch("https://api.kindergartenil.com/attendance", requestOptions)
-      .then((response) => response.json())
-      .then((result) => console.log(result))
-      .catch((error) => console.log("error", error));
-
-    requestOptions = {
-      method: "GET",
-      headers: myHeaders,
-      redirect: "follow",
-    };
-
-    const updatedChild = await fetch(
-      "https://api.kindergartenil.com/children?id=" + id,
+    const attendanceRes = await fetch(
+      "https://api.kindergartenil.com/attendance",
       requestOptions
     )
       .then((response) => response.json())
-      .catch((error) =>
-        console.log("error fetching child id " + id + " " + error)
-      );
-    getChildren(updatedChild);
+      .catch((error) => console.log("error", error));
+    console.log("-------------------------------------");
+    console.log("Child attendance response: " + JSON.stringify(attendanceRes));
+    if (attendanceRes.statusCode == "200") {
+      getChildren({ ...child, is_present: currentStatus });
+      setDisablePress(false);
+    } else {
+      console.log("Child attendance didn't update successfully");
+    }
+
+    console.log("-------------------------------------");
   };
   const handleLongChildPress = (id) => {
     setSelectedId(id);
@@ -104,6 +113,7 @@ function Children({ children, accessToken, getChildren }) {
       child={item}
       handleChildPress={handleChildPress}
       handleLongChildPress={handleLongChildPress}
+      disablePress={disablePress}
     />
   );
 
@@ -127,6 +137,26 @@ function Children({ children, accessToken, getChildren }) {
           }
         />
       </Modal>
+      <View
+        style={{
+          flex: 1,
+          width: "100%",
+          position: "absolute",
+          justifyContent: "center",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 55,
+        }}
+      >
+        <ActivityIndicator
+          size="large"
+          color="#08d4c4"
+          animating={disablePress}
+          style={{
+            zIndex: 11,
+          }}
+        />
+      </View>
       {children && (
         <FlatList
           extraData={selectedId}

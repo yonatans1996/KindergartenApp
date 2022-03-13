@@ -20,7 +20,7 @@ import * as FileSystem from "expo-file-system";
 import base64 from "react-native-base64";
 import axios from "axios";
 import * as mime from "react-native-mime-types";
-
+import * as ImageManipulator from "expo-image-manipulator";
 export default function AddChildModal({
   childEditModal,
   setChildEditModal,
@@ -33,6 +33,7 @@ export default function AddChildModal({
   const submitChild = () => {
     setChildEditModal(!childEditModal);
   };
+  //UIImagePickerControllerQualityType.IFrame1280x720
   const takePhotoFromCamera = async () => {
     let image = await ImagePicker.launchCameraAsync({
       mediaTypes: "Images",
@@ -42,7 +43,13 @@ export default function AddChildModal({
     });
 
     console.log("image = ", image);
-    setImage(image);
+    const resizedPhoto = await ImageManipulator.manipulateAsync(
+      image.uri,
+      [{ resize: { width: 800 } }],
+      { compress: 0.7, format: "jpeg" }
+    );
+    console.log("new image = ", resizedPhoto);
+    setImage(resizedPhoto);
   };
 
   const uploadToS3 = async () => {
@@ -85,8 +92,10 @@ export default function AddChildModal({
       .then((response) => response.text())
       .then((result) => {
         console.log("uploaded image to s3. " + result);
-        setUpload(false);
-        setImage(false);
+        setTimeout(() => {
+          setUpload(false);
+          setImage(false);
+        }, 2000);
         getChildren();
       })
       .catch((error) => console.log("error", error));
@@ -98,10 +107,15 @@ export default function AddChildModal({
       quality: 0.1,
       aspect: [4, 4],
       allowsEditing: true,
-      base64: true,
     });
     console.log("image = ", image);
-    setImage(image);
+    const resizedPhoto = await ImageManipulator.manipulateAsync(
+      image.uri,
+      [{ resize: { width: 800 } }],
+      { compress: 0.7, format: "jpeg" }
+    );
+    console.log("new image = ", resizedPhoto);
+    setImage(resizedPhoto);
   };
 
   useEffect(() => {

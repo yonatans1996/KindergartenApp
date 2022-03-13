@@ -21,15 +21,18 @@ export default function HomeScreen() {
   const [teacher, setTeacher] = useState("...");
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
+
   const getChildren = (newChild = null) => {
     if (newChild) {
       let tempChildren = children.map((child) =>
-        child.child_id !== newChild.child_id ? child : newChild
+        child.child_id !== newChild.child_id
+          ? child
+          : { ...child, is_present: newChild.is_present }
       );
-
       setChildren(tempChildren);
       return;
     }
+
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {
@@ -47,7 +50,7 @@ export default function HomeScreen() {
         console.log("got all children ");
         setChildren(result);
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => console.log("error getting all children", error));
   };
   useEffect(() => {
     getChildren();
