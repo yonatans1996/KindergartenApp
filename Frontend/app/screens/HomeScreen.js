@@ -1,14 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Modal,
-  TouchableOpacity,
-  RefreshControl,
-  ScrollView,
-  LogBox,
-} from "react-native";
+import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import Children from "../components/Children";
@@ -16,8 +7,10 @@ import { AuthContext } from "./AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AddChildModal from "../components/AddChildModal";
+import LottieView from "lottie-react-native";
 export default function HomeScreen() {
   const [children, setChildren] = useState([]);
+  const [isLoadingChildren, setLoadingChildren] = useState(true);
   const [teacher, setTeacher] = useState("...");
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
@@ -32,7 +25,6 @@ export default function HomeScreen() {
       setChildren(tempChildren);
       return;
     }
-
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {
@@ -48,9 +40,18 @@ export default function HomeScreen() {
       .then((response) => response.json())
       .then((result) => {
         console.log("got all children ");
-        setChildren(result);
+        let sortedChildren = result.sort((child1, child2) => {
+          const sortedByFirstName = child1.first_name.localeCompare(
+            child2.first_name
+          );
+          return sortedByFirstName !== 0
+            ? sortedByFirstName
+            : child1.last_name.localeCompare(child2.last_name);
+        });
+        setChildren(sortedChildren);
       })
-      .catch((error) => console.log("error getting all children", error));
+      .catch((error) => console.log("error getting all children", error))
+      .finally(() => setLoadingChildren(false));
   };
   useEffect(() => {
     getChildren();
@@ -108,11 +109,20 @@ export default function HomeScreen() {
           <Ionicons name="swap-vertical" color="black" size={20} />
           <Text>החליקו למעלה לרענון</Text>
         </View>
-        <Children
-          children={children}
-          accessToken={user.accessToken}
-          getChildren={getChildren}
-        />
+        {!isLoadingChildren ? (
+          <Children
+            children={children}
+            accessToken={user.accessToken}
+            getChildren={getChildren}
+          />
+        ) : (
+          <LottieView
+            autoPlay={true}
+            loop={true}
+            style={{}}
+            source={require("../Lotties/loading-saving.json")}
+          />
+        )}
 
         <View style={styles.button}>
           <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
@@ -124,12 +134,6 @@ export default function HomeScreen() {
               <Text style={styles.textSign}>הוספת ילד חדש</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <Text
-            style={{ textAlign: "center", paddingTop: 15 }}
-            onPress={() => setUser({})}
-          >
-            התנתקות
-          </Text>
         </View>
       </View>
     </View>

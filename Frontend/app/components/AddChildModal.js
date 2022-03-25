@@ -40,6 +40,7 @@ export default function AddChildModal({
       last_name: data.lastName,
       parent1_phone_number: data.parent1Phone,
       parent2_phone_number: data.parent2Phone,
+      group_name: "קטנטנים",
     });
 
     var requestOptions = {

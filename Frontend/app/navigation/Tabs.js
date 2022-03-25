@@ -20,6 +20,7 @@ const Tabs = () => {
     >
       <Tab.Screen
         name="הגדרות"
+        unmountOnBlur={true}
         component={SettingsScreen}
         options={{
           tabBarIcon: ({ focused }) => (

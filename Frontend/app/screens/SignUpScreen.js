@@ -33,6 +33,7 @@ export default function SignUpScreen({ navigation }) {
   const [data, setData] = useState({
     email: "",
     password: "",
+    checkPassword: false,
     checkFirstName: false,
     checkLastName: false,
     checkPhone: false,
@@ -42,7 +43,7 @@ export default function SignUpScreen({ navigation }) {
     lastName: "",
     phone: "",
     kinderName: "",
-    kindergartenId: null,
+    kindergartenId: "",
     checkKindergartenId: false,
   });
   const { user, setUser } = useContext(AuthContext);
@@ -68,28 +69,48 @@ export default function SignUpScreen({ navigation }) {
     }
   };
   const handlePassword = (val) => {
-    setData({ ...data, password: val });
+    setData({ ...data, password: val, checkPassword: val.length > 3 });
   };
   const showPassword = () => {
     setData({ ...data, showPass: !data.showPass });
   };
-  const newKindergartenHandle = (val) => {
-    let checked = val.length === 8;
-    setData({ ...data, kindergartenId: val, checkKindergartenId: checked });
+  const newKindergartenHandle = async (val) => {
+    let isKinderId = val.length === 8 ? await isKinderIdExists(val) : false;
+    console.log("checked = ", checked);
+    setData({ ...data, kindergartenId: val, checkKindergartenId: isKinderId });
   };
   const kinderNameHandle = (val) => {
     let checked = val.length > 1;
     setData({ ...data, kinderName: val, checkKinderName: checked });
+  };
+  const isKinderIdExists = async (kinderId) => {
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+    };
+
+    const result = await fetch(
+      "https://api.kindergartenil.com/kindergarten/exist?kindergarten_id=" +
+        kinderId,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .catch((error) =>
+        console.log("error checking if kindergarten id exists: ", error)
+      );
+    console.log(result);
+    return result;
   };
   const handleRegister = () => {
     if (
       !data.checkFirstName ||
       !data.checkLastName ||
       !data.checkPhone ||
+      !data.checkPassword ||
       (checked === "second" && !data.checkKindergartenId) ||
       (checked === "first" && !data.checkKinderName)
     ) {
-      Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך")
+      Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך");
       return;
     }
 
@@ -107,7 +128,7 @@ export default function SignUpScreen({ navigation }) {
         console.log(JSON.stringify(err));
         return;
       }
-      Alert.alert("ההרשמה הושלמה בצהלחה","")
+      Alert.alert("מיד תועברו למסך הראשי", "ההרשמה הושלמה בהצלחה");
       handleSignIn();
     });
   };
@@ -157,7 +178,6 @@ export default function SignUpScreen({ navigation }) {
     var raw = JSON.stringify({
       first_name: data.firstName,
       last_name: data.lastName,
-      is_admin: "1",
       kindergarten_id: data.kindergartenId,
       group_number: "1",
       kindergarten_name: data.kinderName,
@@ -245,6 +265,11 @@ export default function SignUpScreen({ navigation }) {
               autoCapitalize="none"
               onChangeText={(pass) => handlePassword(pass)}
             />
+            {data.checkPassword ? (
+              <Animatable.View animation="bounceIn">
+                <Feather name="check-circle" color="green" size={20} />
+              </Animatable.View>
+            ) : null}
             <Feather
               name={data.showPass ? "eye" : "eye-off"}
               color={data.showPass ? "green" : "gray"}
@@ -306,6 +331,12 @@ export default function SignUpScreen({ navigation }) {
               {data.checkKindergartenId ? (
                 <Animatable.View animation="bounceIn">
                   <Feather name="check-circle" color="green" size={20} />
+                </Animatable.View>
+              ) : null}
+              {data.checkKindergartenId == false &&
+              data.kindergartenId.length === 8 ? (
+                <Animatable.View animation="bounceIn">
+                  <Feather name="x-circle" color="red" size={20} />
                 </Animatable.View>
               ) : null}
             </Animatable.View>

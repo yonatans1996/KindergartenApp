@@ -9,14 +9,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import MaterialIcons from "react-native-vector-icons";
 import * as Animatable from "react-native-animatable";
-
+import LottieView from "lottie-react-native";
 export default function SplashScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Animatable.Image
+        {/* <Animatable.Image
           duration={1500}
           animation="bounceIn"
           style={styles.logo}
@@ -24,6 +23,12 @@ export default function SplashScreen({ navigation }) {
           source={{
             uri: "https://st2.depositphotos.com/1472273/8613/v/950/depositphotos_86130252-stock-illustration-multicolor-kindergarten-logo.jpg",
           }}
+        /> */}
+        <LottieView
+          autoPlay={true}
+          loop={true}
+          style={{}}
+          source={require("../Lotties/enjoying-the-fun-time.json")}
         />
       </View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
