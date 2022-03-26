@@ -24,7 +24,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import Feather from "react-native-vector-icons/Feather";
 import * as Animatable from "react-native-animatable";
 import md5 from "react-native-md5";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../Context/AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreen({ navigation }) {

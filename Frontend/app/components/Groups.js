@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { TextInput } from "react-native-paper";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import { AuthContext } from "../screens/AuthContext";
+import { AuthContext } from "../Context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 const Groups = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -13,6 +13,135 @@ const Groups = () => {
   const [groupName, setGroupName] = useState("");
   const [showNewGroupInput, setShowGroupInput] = useState(false);
   const [showDeleteInput, setShowDeleteInput] = useState(false);
+
+  const updateTeacherGroupInDB = (groupName) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      group_name: groupName,
+    });
+
+    var requestOptions = {
+      method: "PUT",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch(
+      "https://api.kindergartenil.com/teacher/update_group_name",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => console.log("Teacher group updated in DB. ", result))
+      .catch((error) =>
+        console.log("error updating teacher group in DB: ", error)
+      );
+  };
+
+  const addNewGroup = () => {
+    if (groupName.length < 1) {
+      setShowGroupInput(false);
+      return;
+    }
+    let tempGroups = [...groups];
+    let lastElement1 = tempGroups.pop();
+    let lastElement2 = tempGroups.pop();
+    tempGroups.push(
+      { label: groupName, value: groupName },
+      lastElement1,
+      lastElement2
+    );
+    alert("הקבוצה " + groupName + " נוספה בהצלחה");
+    setGroups(tempGroups);
+    addGroupToDB(groupName);
+    setGroupName("");
+    setShowGroupInput(false);
+  };
+
+  const deleteGroup = () => {
+    if (groupName === "Main Group" || groupName === user.group_name) {
+      setShowDeleteInput(false);
+      alert("לא ניתן למחוק קבוצה שיש בה ילדים או גננות");
+      setGroupName("");
+      return;
+    }
+    let found = false;
+    let tempGroups = [...groups];
+    let lastElement1 = tempGroups.pop();
+    let lastElement2 = tempGroups.pop();
+
+    tempGroups = tempGroups.filter((group) => {
+      if (group.value !== groupName) {
+        return true;
+      }
+      found = true;
+      return false;
+    });
+    if (found == false) {
+      alert("שם הקבוצה לא נמצא");
+    } else {
+      tempGroups.push(lastElement1, lastElement2);
+      setGroups(tempGroups);
+      deleteGroupFromDB(groupName);
+      alert("הקבוצה " + groupName + " נמחקה בהצלחה");
+    }
+    setGroupName("");
+    setShowDeleteInput(false);
+  };
+
+  const addGroupToDB = (groupName) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      group_name: groupName,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://api.kindergartenil.com/groups", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Group added. " + result);
+        fetchGroups();
+      })
+      .catch((error) => console.log("Group added error: ", error));
+  };
+
+  const deleteGroupFromDB = (groupName) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      group_name: groupName,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://api.kindergartenil.com/groups/delete", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Group deleted: ", result);
+        fetchGroups();
+      })
+      .catch((error) => console.log("deleting gorup error: ", error));
+  };
+
   const fetchGroups = async () => {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
@@ -35,40 +164,13 @@ const Groups = () => {
     let groupsArr = [];
     groups.forEach((group) => groupsArr.push({ label: group, value: group }));
     groupsArr.push({ label: "הוספת קבוצה חדשה", value: "addGroup" });
-    // groupsArr.push({ label: "מחיקת קבוצה מהגן", value: "deleteGroup" });
+    groupsArr.push({ label: "מחיקת קבוצה מהגן", value: "deleteGroup" });
     setGroups(groupsArr);
-  };
-
-  const addNewGroup = () => {
-    if (groupName.length < 1) {
-      setShowGroupInput(false);
-      return;
-    }
-    let tempGroups = [...groups];
-    let lastElement1 = tempGroups.pop();
-    // let lastElement2 = tempGroups.pop();
-    tempGroups.push(
-      { label: groupName, value: groupName },
-      lastElement1
-      // lastElement2
-    );
-    setGroups(tempGroups);
-    setGroupName("");
-    setShowGroupInput(false);
-  };
-
-  const deleteGroup = () => {
-    if (groupName === "Main Group" || groupName === user.group_name) {
-      alert("לא ניתן למחוק קבוצה זו");
-    }
-    let tempGroups = [...groups];
-    tempGroups = tempGroups.filter((group) => group.value !== groupName);
-    setGroups(tempGroups);
   };
 
   useEffect(() => {
     fetchGroups();
-    return () => console.log("Drop down closed.");
+    console.log("Groups added.");
   }, []);
 
   return (
@@ -101,6 +203,7 @@ const Groups = () => {
           } else {
             setShowGroupInput(false);
             setShowDeleteInput(false);
+            updateTeacherGroupInDB(item.label);
             setUser({ ...user, group_name: item.value });
           }
         }}
@@ -163,7 +266,7 @@ const Groups = () => {
             }}
             direction="rtl"
             textAlign="right"
-            placeholder="הכנס את שם הקבוצה שברצונך למחוק"
+            placeholder="שם הקבוצה למחיקה"
             value={groupName}
             onChangeText={(name) => setGroupName(name)}
           />

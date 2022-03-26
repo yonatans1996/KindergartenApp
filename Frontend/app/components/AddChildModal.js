@@ -4,10 +4,10 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View,
-  TextInput,
   ScrollView,
   KeyboardAvoidingView,
+  View,
+  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { useEffect, useState } from "react";
@@ -15,12 +15,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { faUser, faUsers, faPhone } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as Animatable from "react-native-animatable";
+import ChildGroups from "./ChildGroups";
 
 export default function AddChildModal({
   setModalVisible,
   modalVisible,
   accessToken,
   getChildren,
+  groups,
+  teacherGroup,
+  fetchGroups,
 }) {
   const [data, setData] = useState({
     firstName: "",
@@ -28,6 +32,7 @@ export default function AddChildModal({
     parent1Phone: false,
     parent2Phone: false,
   });
+  const [selectedGroup, setGroup] = useState(teacherGroup);
 
   const submitChild = () => {
     console.log("access token = ", accessToken);
@@ -40,7 +45,7 @@ export default function AddChildModal({
       last_name: data.lastName,
       parent1_phone_number: data.parent1Phone,
       parent2_phone_number: data.parent2Phone,
-      group_name: "קטנטנים",
+      group_name: selectedGroup,
     });
 
     var requestOptions = {
@@ -62,91 +67,94 @@ export default function AddChildModal({
 
   useEffect(() => {
     // console.log(Dimensions.get("window"));
+    fetchGroups();
   }, []);
   return (
-    <KeyboardAvoidingView behavior={"height"} enabled style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       <View style={styles.modal}>
         <Animatable.View style={styles.footer} animation="fadeInUpBig">
-          <ScrollView>
-            <Text style={styles.text_footer}>שם פרטי</Text>
-            <View style={styles.action}>
-              <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
-              <TextInput
-                placeholder=""
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => setData({ ...data, firstName: val })}
-              />
-            </View>
-            <Text style={[{ marginTop: 35 }, styles.text_footer]}>
-              שם משפחה
-            </Text>
-            <View style={styles.action}>
-              <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
-              <TextInput
-                placeholder=""
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => setData({ ...data, lastName: val })}
-              />
-            </View>
-            <Text style={[{ marginTop: 35 }, styles.text_footer]}>
-              טלפון הורה 1
-            </Text>
-            <View style={styles.action}>
-              <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
-              <TextInput
-                keyboardType="phone-pad"
-                placeholder=""
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => setData({ ...data, parent1Phone: val })}
-                maxLength={10}
-              />
-            </View>
-            <Text style={[{ marginTop: 35 }, styles.text_footer]}>
-              טלפון הורה 2
-            </Text>
-            <View style={styles.action}>
-              <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
-              <TextInput
-                keyboardType="phone-pad"
-                placeholder=""
-                style={styles.textInput}
-                autoCapitalize="none"
-                onChangeText={(val) => setData({ ...data, parent2Phone: val })}
-                maxLength={10}
-              />
-            </View>
-            <View style={styles.buttons}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => submitChild()}
+          <Text style={styles.text_footer}>שם פרטי</Text>
+          <View style={styles.action}>
+            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
+            <TextInput
+              placeholder=""
+              style={styles.textInput}
+              autoCapitalize="none"
+              onChangeText={(val) => setData({ ...data, firstName: val })}
+            />
+          </View>
+          <Text style={[{ marginTop: 35 }, styles.text_footer]}>שם משפחה</Text>
+          <View style={styles.action}>
+            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
+            <TextInput
+              placeholder=""
+              style={styles.textInput}
+              autoCapitalize="none"
+              onChangeText={(val) => setData({ ...data, lastName: val })}
+            />
+          </View>
+          <Text style={[{ marginTop: 35 }, styles.text_footer]}>
+            טלפון הורה 1
+          </Text>
+          <View style={styles.action}>
+            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
+            <TextInput
+              keyboardType="phone-pad"
+              placeholder=""
+              style={styles.textInput}
+              autoCapitalize="none"
+              onChangeText={(val) => setData({ ...data, parent1Phone: val })}
+              maxLength={10}
+            />
+          </View>
+          <Text style={[{ marginTop: 35 }, styles.text_footer]}>
+            טלפון הורה 2
+          </Text>
+          <View style={styles.action}>
+            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
+            <TextInput
+              keyboardType="phone-pad"
+              placeholder=""
+              style={styles.textInput}
+              autoCapitalize="none"
+              onChangeText={(val) => setData({ ...data, parent2Phone: val })}
+              maxLength={10}
+            />
+          </View>
+          <Text style={[{ marginTop: 35 }, styles.text_footer]}>
+            קבוצת הילד/ה
+          </Text>
+          <ChildGroups
+            value={selectedGroup}
+            setValue={setGroup}
+            groups={groups}
+          />
+          <View style={styles.buttons}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => submitChild()}
+            >
+              <LinearGradient
+                colors={["#08d4c4", "#01ab9d"]}
+                style={styles.signIn}
               >
-                <LinearGradient
-                  colors={["#08d4c4", "#01ab9d"]}
-                  style={styles.signIn}
-                >
-                  <Text style={[styles.textSign, { color: "white" }]}>
-                    הוספה
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button]}
-                onPress={() => setModalVisible(!modalVisible)}
+                <Text style={[styles.textSign, { color: "white" }]}>הוספה</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <View
+                style={[styles.signIn, { borderWidth: 2, borderColor: "red" }]}
               >
-                <View
-                  style={[
-                    styles.signIn,
-                    { borderWidth: 2, borderColor: "red" },
-                  ]}
-                >
-                  <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+                <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </Animatable.View>
       </View>
     </KeyboardAvoidingView>
@@ -157,12 +165,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
+
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modal: {
-    width: windowDimensions.width - 50,
-    height: windowDimensions.height * 0.63,
+    marginTop: 10,
+    width: windowDimensions.width - 10,
+    height: windowDimensions.height - 20,
     position: "absolute",
   },
   header: {

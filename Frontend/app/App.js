@@ -1,11 +1,10 @@
-
 import { StyleSheet, StatusBar } from "react-native";
 import Tabs from "./navigation/Tabs";
 import RootStackScreen from "./screens/RootStackScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
-import { AuthContext } from "./screens/AuthContext";
+import { AuthContext } from "./Context/AuthContext";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function App() {

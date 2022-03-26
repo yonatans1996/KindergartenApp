@@ -3,17 +3,38 @@ import { StyleSheet, Text, View, Modal, TouchableOpacity } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import Children from "../components/Children";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../Context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AddChildModal from "../components/AddChildModal";
 import LottieView from "lottie-react-native";
 export default function HomeScreen() {
   const [children, setChildren] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [isLoadingChildren, setLoadingChildren] = useState(true);
   const [teacher, setTeacher] = useState("...");
   const { user, setUser } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const fetchGroups = async () => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    let groups = await fetch(
+      "https://api.kindergartenil.com/groups",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .catch((error) => console.log("error fetching groups: ", error));
+    groups = groups.groups_in_kindergarten;
+    setGroups(groups);
+  };
 
   const getChildren = (newChild = null) => {
     if (newChild) {
@@ -55,6 +76,7 @@ export default function HomeScreen() {
   };
   useEffect(() => {
     getChildren();
+    fetchGroups();
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
 
@@ -79,6 +101,8 @@ export default function HomeScreen() {
         setTeacher(result.kindergarten_name);
       })
       .catch((error) => console.log("get kindergarden info error = ", error));
+
+    setTimeout(() => console.log("USER OBJECT = ", user), 3000);
   }, []);
 
   return (
@@ -95,7 +119,10 @@ export default function HomeScreen() {
           setModalVisible={setModalVisible}
           modalVisible={modalVisible}
           accessToken={user.accessToken}
+          teacherGroup={user.group_name}
           getChildren={getChildren}
+          groups={groups}
+          fetchGroups={fetchGroups}
         />
       </Modal>
 

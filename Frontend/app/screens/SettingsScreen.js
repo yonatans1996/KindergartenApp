@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, TextInput } from "react-native";
 import { useEffect, useState, useContext } from "react";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../Context/AuthContext";
 import * as Animatable from "react-native-animatable";
 import Groups from "../components/Groups";
 

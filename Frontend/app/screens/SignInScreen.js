@@ -20,7 +20,7 @@ import * as Animatable from "react-native-animatable";
 import { text } from "@fortawesome/fontawesome-svg-core";
 import * as AWS from "aws-sdk/global";
 import md5 from "react-native-md5";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../Context/AuthContext";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignInScreen({ navigation }) {
