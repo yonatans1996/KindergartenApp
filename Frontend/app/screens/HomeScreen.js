@@ -9,11 +9,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import AddChildModal from "../components/AddChildModal";
 import LottieView from "lottie-react-native";
 export default function HomeScreen() {
-  const [children, setChildren] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [isLoadingChildren, setLoadingChildren] = useState(true);
   const [teacher, setTeacher] = useState("...");
-  const { user, setUser } = useContext(AuthContext);
+  const {
+    user,
+    setUser,
+    children,
+    getChildren,
+    isLoadingChildren,
+    setLoadingChildren,
+  } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
 
   const fetchGroups = async () => {
@@ -36,44 +41,6 @@ export default function HomeScreen() {
     setGroups(groups);
   };
 
-  const getChildren = (newChild = null) => {
-    if (newChild) {
-      let tempChildren = children.map((child) =>
-        child.child_id !== newChild.child_id
-          ? child
-          : { ...child, is_present: newChild.is_present }
-      );
-      setChildren(tempChildren);
-      return;
-    }
-    var myHeaders = new Headers();
-    myHeaders.append("Authorization", user.accessToken);
-    var requestOptions = {
-      method: "GET",
-      redirect: "follow",
-      headers: myHeaders,
-    };
-
-    fetch(
-      "https://api.kindergartenil.com/kindergarten/group_chidren",
-      requestOptions
-    )
-      .then((response) => response.json())
-      .then((result) => {
-        console.log("got all children ");
-        let sortedChildren = result.sort((child1, child2) => {
-          const sortedByFirstName = child1.first_name.localeCompare(
-            child2.first_name
-          );
-          return sortedByFirstName !== 0
-            ? sortedByFirstName
-            : child1.last_name.localeCompare(child2.last_name);
-        });
-        setChildren(sortedChildren);
-      })
-      .catch((error) => console.log("error getting all children", error))
-      .finally(() => setLoadingChildren(false));
-  };
   useEffect(() => {
     getChildren();
     fetchGroups();

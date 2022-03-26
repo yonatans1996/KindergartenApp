@@ -6,7 +6,7 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { AuthContext } from "../Context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 const Groups = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, getChildren } = useContext(AuthContext);
   const [groups, setGroups] = useState([]);
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
@@ -35,7 +35,10 @@ const Groups = () => {
       requestOptions
     )
       .then((response) => response.json())
-      .then((result) => console.log("Teacher group updated in DB. ", result))
+      .then((result) => {
+        console.log("Teacher group updated in DB. ", result);
+        getChildren();
+      })
       .catch((error) =>
         console.log("error updating teacher group in DB: ", error)
       );

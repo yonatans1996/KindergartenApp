@@ -9,6 +9,8 @@ var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function App() {
   const [user, setUser] = useState({});
+  const [children, setChildren] = useState([]);
+  const [isLoadingChildren, setLoadingChildren] = useState(true);
   var cognitoUser = {};
   var poolData = {
     UserPoolId: "us-east-1_PokjeshX3", // Your user pool id here
@@ -25,9 +27,58 @@ export default function App() {
     });
   };
 
+  const getChildren = (newChild = null) => {
+    if (newChild) {
+      let tempChildren = children.map((child) =>
+        child.child_id !== newChild.child_id
+          ? child
+          : { ...child, is_present: newChild.is_present }
+      );
+      setChildren(tempChildren);
+      return;
+    }
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+    var requestOptions = {
+      method: "GET",
+      redirect: "follow",
+      headers: myHeaders,
+    };
+
+    fetch(
+      "https://api.kindergartenil.com/kindergarten/group_chidren",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("got all children ");
+        let sortedChildren = result.sort((child1, child2) => {
+          const sortedByFirstName = child1.first_name.localeCompare(
+            child2.first_name
+          );
+          return sortedByFirstName !== 0
+            ? sortedByFirstName
+            : child1.last_name.localeCompare(child2.last_name);
+        });
+        setChildren(sortedChildren);
+      })
+      .catch((error) => console.log("error getting all children", error))
+      .finally(() => setLoadingChildren(false));
+  };
+
   useEffect(() => {}, []);
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        children,
+        setChildren,
+        getChildren,
+        setLoadingChildren,
+        isLoadingChildren,
+      }}
+    >
       {user.accessToken ? (
         <NavigationContainer>
           <Tabs />
