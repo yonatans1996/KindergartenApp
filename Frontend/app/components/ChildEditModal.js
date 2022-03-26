@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   ImageBackground,
+  Alert,
   ActivityIndicator,
 } from "react-native";
 import Feather from "react-native-vector-icons/Feather";
@@ -21,6 +22,7 @@ import base64 from "react-native-base64";
 import axios from "axios";
 import * as mime from "react-native-mime-types";
 import * as ImageManipulator from "expo-image-manipulator";
+import ChildCalendar from "./ChildCalendar";
 export default function AddChildModal({
   childEditModal,
   setChildEditModal,
@@ -30,9 +32,20 @@ export default function AddChildModal({
 }) {
   const [image, setImage] = useState(null);
   const [isUpload, setUpload] = useState(false);
+
   const submitChild = () => {
     setChildEditModal(!childEditModal);
   };
+
+  const deleteConfirmationAlert = () =>
+    Alert.alert("האם למחוק ילד/ה?", "פעולה זו אינה הפיכה", [
+      {
+        text: "לא",
+        onPress: () => console.log("Cancel Pressed"),
+        style: "cancel",
+      },
+      { text: "כן", onPress: () => deleteChild() },
+    ]);
   //UIImagePickerControllerQualityType.IFrame1280x720
   const takePhotoFromCamera = async () => {
     let image = await ImagePicker.launchCameraAsync({
@@ -118,6 +131,31 @@ export default function AddChildModal({
     setImage(resizedPhoto);
   };
 
+  const deleteChild = () => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", accessToken);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      id: childInfo.child_id,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://api.kindergartenil.com/children/delete", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Deleted child successfully", result);
+        getChildren();
+        setChildEditModal(false);
+      })
+      .catch((error) => console.log("error", error));
+  };
   useEffect(() => {
     console.log("child modal open of = ", childInfo);
   }, []);
@@ -175,9 +213,18 @@ export default function AddChildModal({
             }}
           ></ImageBackground>
         )}
-        <ActivityIndicator size="large" color="#08d4c4" animating={isUpload} />
-        <Text style={{ color: "white", fontSize: 20, paddingTop: 5 }}>
+        {isUpload && (
+          <ActivityIndicator
+            size="large"
+            color="#08d4c4"
+            animating={isUpload}
+          />
+        )}
+        <Text style={{ color: "white", fontSize: 20 }}>
           {childInfo.first_name} {childInfo.last_name}
+        </Text>
+        <Text style={{ color: "white", fontSize: 16 }}>
+          קבוצה: {childInfo.group_name}
         </Text>
       </View>
       <View style={{ flex: 1, width: "90%" }}>
@@ -217,6 +264,25 @@ export default function AddChildModal({
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => deleteConfirmationAlert()}
+          style={{ marginTop: 15, marginBottom: 15 }}
+        >
+          <LinearGradient
+            colors={["#e33232", "#e86868"]}
+            style={{ borderRadius: 30 }}
+          >
+            <Text
+              style={[
+                styles.textSign,
+                { color: "white", textAlign: "center", padding: 10 },
+              ]}
+            >
+              מחיקת הילד/ה מהגן
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <ChildCalendar childInfo={childInfo} />
       </View>
 
       {/* <View style={styles.button}>
@@ -273,7 +339,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     alignItems: "center",
     justifyContent: "flex-start",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "#789c8a",
   },
 
   header: {

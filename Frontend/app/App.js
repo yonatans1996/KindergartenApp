@@ -52,15 +52,7 @@ export default function App() {
       .then((response) => response.json())
       .then((result) => {
         console.log("got all children ");
-        let sortedChildren = result.sort((child1, child2) => {
-          const sortedByFirstName = child1.first_name.localeCompare(
-            child2.first_name
-          );
-          return sortedByFirstName !== 0
-            ? sortedByFirstName
-            : child1.last_name.localeCompare(child2.last_name);
-        });
-        setChildren(sortedChildren);
+        setChildren(result);
       })
       .catch((error) => console.log("error getting all children", error))
       .finally(() => setLoadingChildren(false));

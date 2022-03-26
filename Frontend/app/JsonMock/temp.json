@@ -1,0 +1,24 @@
+{
+  "2022-03-20": {
+    "customStyles": {
+      "container": {
+        "backgroundColor": "green"
+      },
+      "text": {
+        "color": "white",
+        "fontWeight": "bold"
+      }
+    }
+  },
+  "2022-03-21": {
+    "customStyles": {
+      "container": {
+        "backgroundColor": "red"
+      },
+      "text": {
+        "color": "white",
+        "fontWeight": "bold"
+      }
+    }
+  }
+}

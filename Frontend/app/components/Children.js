@@ -10,10 +10,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  SectionList,
 } from "react-native";
 import base64 from "react-native-base64";
 import * as Animatable from "react-native-animatable";
 import ChildEditModal from "./ChildEditModal";
+let lastGroup = null;
 const Child = ({
   child,
   handleChildPress,
@@ -48,9 +50,11 @@ const Child = ({
   </Animatable.View>
 );
 function Children({ children, accessToken, getChildren }) {
+  const windowDimensions = Dimensions.get("window");
   const [refreshing, setRefreshing] = React.useState(false);
   const [childEditModal, setChildEditModal] = useState(false);
   const [disablePress, setDisablePress] = useState(false);
+
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     getChildren();
@@ -60,6 +64,38 @@ function Children({ children, accessToken, getChildren }) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
   };
   const [selectedId, setSelectedId] = useState(null);
+  const createSections = () => {
+    if (children.length < 1) {
+      return;
+    }
+    let sections = [];
+    let lastGroup = children[0].group_name;
+    for (let i = 0; i < children.length; i++) {
+      let data = [];
+      for (; i < children.length; i++) {
+        if (children[i].group_name !== lastGroup) break;
+        data.push(children[i]);
+      }
+      sections.push({ data, key: lastGroup });
+      if (i < children.length) {
+        lastGroup = children[i].group_name;
+        i--;
+      }
+    }
+    return sections;
+    /*[
+            {
+              data: children.filter(
+                (child) => child.group_name === "קבוצה ראשית"
+              ),
+              key: 1,
+            },
+            {
+              data: children.filter((child) => child.group_name === "קטנטנים"),
+              key: 2,
+            },
+          ]*/
+  };
   useEffect(() => {
     console.log("Rendered children component");
   }, []);
@@ -146,28 +182,64 @@ function Children({ children, accessToken, getChildren }) {
           zIndex: 55,
         }}
       >
-        <ActivityIndicator
-          size="large"
-          color="#08d4c4"
-          animating={disablePress}
-          style={{
-            zIndex: 11,
-          }}
-        />
+        {disablePress && (
+          <ActivityIndicator
+            size="large"
+            color="#08d4c4"
+            animating={disablePress}
+            style={{
+              zIndex: 11,
+            }}
+          />
+        )}
       </View>
-      {children && (
-        <FlatList
-          extraData={selectedId}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-          contentContainerStyle={styles.flatlist}
-          data={children}
-          numColumns={3}
-          renderItem={renderChildren}
-          keyExtractor={(item) => item.child_id}
-        />
-      )}
+      {
+        children && (
+          <SectionList
+            extraData={selectedId}
+            numColumns={3}
+            renderSectionHeader={({ section }) => (
+              <View
+                style={{
+                  borderBottomColor: "black",
+                  borderBottomWidth: 1,
+                  borderTopWidth: 1,
+                }}
+              >
+                <Text
+                  style={{ width: windowDimensions.width, textAlign: "center" }}
+                >
+                  {section.data[0].group_name}
+                </Text>
+              </View>
+            )}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            sections={createSections()}
+            contentContainerStyle={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "flex-start",
+              flexWrap: "wrap",
+            }}
+            renderItem={renderChildren}
+            keyExtractor={(item) => item.child_id}
+          />
+        )
+
+        // <FlatList
+        //   extraData={selectedId}
+        //   refreshControl={
+        //     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        //   }
+        //   contentContainerStyle={styles.flatlist}
+        //   data={children}
+        //   numColumns={3}
+        //   renderItem={renderChildren}
+        //   keyExtractor={(item) => item.child_id}
+        // />
+      }
     </View>
   );
 }
