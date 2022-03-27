@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
+  LogBox,
   SectionList,
 } from "react-native";
 import base64 from "react-native-base64";

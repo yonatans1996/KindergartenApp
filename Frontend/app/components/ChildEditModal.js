@@ -156,6 +156,7 @@ export default function AddChildModal({
       })
       .catch((error) => console.log("error", error));
   };
+
   useEffect(() => {
     console.log("child modal open of = ", childInfo);
   }, []);
@@ -223,9 +224,9 @@ export default function AddChildModal({
         <Text style={{ color: "white", fontSize: 20 }}>
           {childInfo.first_name} {childInfo.last_name}
         </Text>
-        <Text style={{ color: "white", fontSize: 16 }}>
+        {/* <Text style={{ color: "white", fontSize: 16 }}>
           קבוצה: {childInfo.group_name}
-        </Text>
+        </Text> */}
       </View>
       <View style={{ flex: 1, width: "90%" }}>
         <TouchableOpacity
@@ -282,7 +283,7 @@ export default function AddChildModal({
             </Text>
           </LinearGradient>
         </TouchableOpacity>
-        <ChildCalendar childInfo={childInfo} />
+        <ChildCalendar childInfo={childInfo} accessToken={accessToken} />
       </View>
 
       {/* <View style={styles.button}>

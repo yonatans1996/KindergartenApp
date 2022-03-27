@@ -1,4 +1,4 @@
-import { StyleSheet, StatusBar } from "react-native";
+import { StyleSheet, StatusBar, LogBox } from "react-native";
 import Tabs from "./navigation/Tabs";
 import RootStackScreen from "./screens/RootStackScreen";
 import { NavigationContainer } from "@react-navigation/native";
@@ -58,7 +58,9 @@ export default function App() {
       .finally(() => setLoadingChildren(false));
   };
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    LogBox.ignoreLogs(["numColumns"]);
+  }, []);
   return (
     <AuthContext.Provider
       value={{

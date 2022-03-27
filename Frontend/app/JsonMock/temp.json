@@ -1,24 +1,20 @@
 {
-  "2022-03-20": {
+  "2022-03-01": {
     "customStyles": {
-      "container": {
-        "backgroundColor": "green"
-      },
-      "text": {
-        "color": "white",
-        "fontWeight": "bold"
-      }
+      "container": { "backgroundColor": "green" },
+      "text": { "color": "white", "fontWeight": "bold" }
     }
   },
-  "2022-03-21": {
+  "2022-03-25": {
     "customStyles": {
-      "container": {
-        "backgroundColor": "red"
-      },
-      "text": {
-        "color": "white",
-        "fontWeight": "bold"
-      }
+      "container": { "backgroundColor": "green" },
+      "text": { "color": "white", "fontWeight": "bold" }
+    }
+  },
+  "2022-03-26": {
+    "customStyles": {
+      "container": { "backgroundColor": "green" },
+      "text": { "color": "white", "fontWeight": "bold" }
     }
   }
 }
