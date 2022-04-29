@@ -19,15 +19,14 @@ const Tabs = () => {
       }}
     >
       <Tab.Screen
-        name="הגדרות"
-        unmountOnBlur={true}
-        component={SettingsScreen}
+        name="בית"
+        component={HomeScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>
               <FontAwesomeIcon
-                icon={faGear}
                 style={{ marginBottom: -15 }}
+                icon={faHome}
                 color={focused ? "#007AFF" : "gray"}
               />
             </View>
@@ -50,14 +49,15 @@ const Tabs = () => {
         }}
       />
       <Tab.Screen
-        name="בית"
-        component={HomeScreen}
+        name="הגדרות"
+        unmountOnBlur={true}
+        component={SettingsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>
               <FontAwesomeIcon
+                icon={faGear}
                 style={{ marginBottom: -15 }}
-                icon={faHome}
                 color={focused ? "#007AFF" : "gray"}
               />
             </View>

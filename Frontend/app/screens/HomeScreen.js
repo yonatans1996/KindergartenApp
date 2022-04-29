@@ -16,11 +16,16 @@ export default function HomeScreen() {
     setUser,
     children,
     getChildren,
+    attendance,
     isLoadingChildren,
     setLoadingChildren,
   } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
 
+  let currentDate = new Date();
+  currentDate = `${currentDate.getDate()}/${
+    currentDate.getMonth() + 1
+  }/${currentDate.getFullYear().toString().slice(-2)}`;
   const fetchGroups = async () => {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", user.accessToken);
@@ -103,6 +108,12 @@ export default function HomeScreen() {
           <Ionicons name="swap-vertical" color="black" size={20} />
           <Text>החליקו למעלה לרענון</Text>
         </View>
+        <View style={styles.date}>
+          <Ionicons name="calendar" color="#009387" size={20} />
+          <Text> {currentDate}</Text>
+          <Text> | נוכחים: {children.length} / </Text>
+          <Text>{attendance}</Text>
+        </View>
         {!isLoadingChildren ? (
           <Children
             children={children}
@@ -124,8 +135,8 @@ export default function HomeScreen() {
               colors={["#08d4c4", "#01ab9d"]}
               style={styles.signIn}
             >
-              <Ionicons name="add" color="#fff" size={20} />
               <Text style={styles.textSign}>הוספת ילד חדש</Text>
+              <Ionicons name="add" color="#fff" size={20} />
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -162,6 +173,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: -15,
+    marginBottom: 5,
+  },
+  date: {
+    flexDirection: "row",
+    textAlign: "right",
+    justifyContent: "flex-start",
+    marginTop: -5,
     marginBottom: 5,
   },
   signIn: {

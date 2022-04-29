@@ -37,27 +37,25 @@ export default function SplashScreen({ navigation }) {
         <View style={styles.buttons}>
           <View style={styles.button}>
             <TouchableOpacity
-              onPress={() => navigation.navigate("SignUpScreen")}
-            >
-              <LinearGradient
-                colors={["#08d4c4", "#01ab9d"]}
-                style={styles.signIn}
-              >
-                <Ionicons name="add" color="#fff" size={20} />
-                <Text style={styles.textSign}>הרשמה</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.button}>
-            <TouchableOpacity
               onPress={() => navigation.navigate("SignInScreen")}
             >
               <LinearGradient
                 colors={["#08d4c4", "#01ab9d"]}
                 style={styles.signIn}
               >
-                <Ionicons name="arrow-back" color="#fff" size={20} />
                 <Text style={styles.textSign}>כניסה</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.button}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SignUpScreen")}
+            >
+              <LinearGradient
+                colors={["#08d4c4", "#01ab9d"]}
+                style={styles.signIn}
+              >
+                <Text style={styles.textSign}>הרשמה</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>

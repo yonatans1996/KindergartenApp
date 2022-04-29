@@ -10,6 +10,7 @@ var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 export default function App() {
   const [user, setUser] = useState({});
   const [children, setChildren] = useState([]);
+  const [attendance, setAttendance] = useState("");
   const [isLoadingChildren, setLoadingChildren] = useState(true);
   var cognitoUser = {};
   var poolData = {
@@ -34,6 +35,7 @@ export default function App() {
           ? child
           : { ...child, is_present: newChild.is_present }
       );
+      handleAttendance(tempChildren);
       setChildren(tempChildren);
       return;
     }
@@ -52,10 +54,19 @@ export default function App() {
       .then((response) => response.json())
       .then((result) => {
         console.log("got all children ");
+        handleAttendance(result);
         setChildren(result);
       })
       .catch((error) => console.log("error getting all children", error))
       .finally(() => setLoadingChildren(false));
+  };
+
+  const handleAttendance = (children) => {
+    let currentAttendance = 0;
+    children.forEach(
+      (child) => (currentAttendance += child.is_present === "yes" ? 1 : 0)
+    );
+    setAttendance(currentAttendance);
   };
 
   useEffect(() => {
@@ -65,6 +76,7 @@ export default function App() {
     <AuthContext.Provider
       value={{
         user,
+        attendance,
         setUser,
         children,
         setChildren,
