@@ -5,6 +5,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 import { AuthContext } from "./Context/AuthContext";
+import { I18nManager } from "react-native";
+I18nManager.forceRTL(true);
+I18nManager.allowRTL(true);
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function App() {

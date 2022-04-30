@@ -210,7 +210,6 @@ export default function SignUpScreen({ navigation }) {
         <ScrollView>
           <Text style={styles.text_footer}>שם פרטי</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
             <TextInput
               placeholder=""
               style={styles.textInput}
@@ -222,10 +221,10 @@ export default function SignUpScreen({ navigation }) {
                 <Feather name="check-circle" color="green" size={20} />
               </Animatable.View>
             ) : null}
+            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>שם משפחה</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
             <TextInput
               placeholder=""
               style={styles.textInput}
@@ -237,10 +236,15 @@ export default function SignUpScreen({ navigation }) {
                 <Feather name="check-circle" color="green" size={20} />
               </Animatable.View>
             ) : null}
+            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>טלפון</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
+            {data.checkPhone ? (
+              <Animatable.View animation="bounceIn">
+                <Feather name="check-circle" color="green" size={20} />
+              </Animatable.View>
+            ) : null}
             <TextInput
               keyboardType="phone-pad"
               placeholder=""
@@ -249,15 +253,27 @@ export default function SignUpScreen({ navigation }) {
               onChangeText={(val) => phoneInputChange(val)}
               maxLength={10}
             />
-            {data.checkPhone ? (
-              <Animatable.View animation="bounceIn">
-                <Feather name="check-circle" color="green" size={20} />
-              </Animatable.View>
-            ) : null}
+
+            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>סיסמה</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
+            <Feather
+              name={data.showPass ? "eye" : "eye-off"}
+              color={data.showPass ? "green" : "gray"}
+              size={20}
+              onPress={() => showPassword()}
+            />
+            {data.checkPassword ? (
+              <Animatable.View animation="bounceIn">
+                <Feather
+                  name="check-circle"
+                  color="green"
+                  size={20}
+                  style={{ paddingRight: 5 }}
+                />
+              </Animatable.View>
+            ) : null}
             <TextInput
               placeholder=""
               secureTextEntry={!data.showPass}
@@ -265,30 +281,20 @@ export default function SignUpScreen({ navigation }) {
               autoCapitalize="none"
               onChangeText={(pass) => handlePassword(pass)}
             />
-            {data.checkPassword ? (
-              <Animatable.View animation="bounceIn">
-                <Feather name="check-circle" color="green" size={20} />
-              </Animatable.View>
-            ) : null}
-            <Feather
-              name={data.showPass ? "eye" : "eye-off"}
-              color={data.showPass ? "green" : "gray"}
-              size={20}
-              onPress={() => showPassword()}
-            />
+            <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
           </View>
           <View style={[styles.radioBox, { marginTop: 35 }]}>
-            <RadioButton
-              value="first"
-              status={checked === "first" ? "checked" : "unchecked"}
-              onPress={() => setChecked("first")}
-            />
             <Text
               onPress={() => setChecked("first")}
               style={styles.text_footer}
             >
               יצירת גן חדש
             </Text>
+            <RadioButton
+              value="first"
+              status={checked === "first" ? "checked" : "unchecked"}
+              onPress={() => setChecked("first")}
+            />
           </View>
           {checked === "first" && (
             <Animatable.View style={styles.action} animation="slideInUp">
@@ -300,24 +306,29 @@ export default function SignUpScreen({ navigation }) {
               />
               {data.checkKinderName ? (
                 <Animatable.View animation="bounceIn">
-                  <Feather name="check-circle" color="green" size={20} />
+                  <Feather
+                    name="check-circle"
+                    color="green"
+                    size={20}
+                    style={{ paddingLeft: 8 }}
+                  />
                 </Animatable.View>
               ) : null}
             </Animatable.View>
           )}
 
           <View style={styles.radioBox}>
+            <Text
+              onPress={() => setChecked("second")}
+              style={styles.text_footer}
+            >
+              הצטרפות לגן קיים
+            </Text>
             <RadioButton
               value="first"
               status={checked === "second" ? "checked" : "unchecked"}
               onPress={() => setChecked("second")}
             />
-            <Text
-              onPress={() => setChecked("second")}
-              style={styles.text_footer}
-            >
-              התחברות לגן קיים
-            </Text>
           </View>
           {checked === "second" && (
             <Animatable.View style={styles.action} animation="slideInDown">
@@ -330,13 +341,23 @@ export default function SignUpScreen({ navigation }) {
               />
               {data.checkKindergartenId ? (
                 <Animatable.View animation="bounceIn">
-                  <Feather name="check-circle" color="green" size={20} />
+                  <Feather
+                    name="check-circle"
+                    color="green"
+                    size={20}
+                    style={{ paddingLeft: 8 }}
+                  />
                 </Animatable.View>
               ) : null}
               {data.checkKindergartenId == false &&
               data.kindergartenId.length === 8 ? (
                 <Animatable.View animation="bounceIn">
-                  <Feather name="x-circle" color="red" size={20} />
+                  <Feather
+                    name="x-circle"
+                    color="red"
+                    size={20}
+                    style={{ paddingLeft: 8 }}
+                  />
                 </Animatable.View>
               ) : null}
             </Animatable.View>
@@ -350,7 +371,7 @@ export default function SignUpScreen({ navigation }) {
               colors={["#08d4c4", "#01ab9d"]}
               style={styles.signIn}
             >
-              <Text style={[styles.textSign, { color: "white" }]}>הירשמו</Text>
+              <Text style={[styles.textSign, { color: "white" }]}>הרשמה</Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -411,8 +432,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     flex: 1,
-    marginTop: Platform.OS === "ios" ? 0 : -12,
-    paddingLeft: 10,
+    paddingRight: 10,
     color: "#05375a",
   },
   errorMsg: {

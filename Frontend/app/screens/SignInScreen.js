@@ -90,7 +90,11 @@ export default function SignInScreen({ navigation }) {
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
         <Text style={styles.text_footer}>טלפון</Text>
         <View style={styles.action}>
-          <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
+          {data.checkPhone ? (
+            <Animatable.View animation="bounceIn">
+              <Feather name="check-circle" color="green" size={20} />
+            </Animatable.View>
+          ) : null}
           <TextInput
             maxLength={10}
             keyboardType="phone-pad"
@@ -99,15 +103,22 @@ export default function SignInScreen({ navigation }) {
             autoCapitalize="none"
             onChangeText={(val) => phoneInputChange(val)}
           />
-          {data.checkPhone ? (
-            <Animatable.View animation="bounceIn">
-              <Feather name="check-circle" color="green" size={20} />
-            </Animatable.View>
-          ) : null}
+          <FontAwesomeIcon
+            icon={faPhone}
+            color="#05375a"
+            size={20}
+            style={{ marginRight: 5 }}
+          />
         </View>
         <Text style={[{ marginTop: 35 }, styles.text_footer]}>סיסמה</Text>
         <View style={styles.action}>
-          <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
+          <Feather
+            style={{ paddingRight: 5 }}
+            name={data.showPass ? "eye" : "eye-off"}
+            color={data.showPass ? "green" : "gray"}
+            size={20}
+            onPress={() => showPassword()}
+          />
           <TextInput
             placeholder=""
             secureTextEntry={!data.showPass}
@@ -115,12 +126,7 @@ export default function SignInScreen({ navigation }) {
             autoCapitalize="none"
             onChangeText={(pass) => handlePassword(pass)}
           />
-          <Feather
-            name={data.showPass ? "eye" : "eye-off"}
-            color={data.showPass ? "green" : "gray"}
-            size={20}
-            onPress={() => showPassword()}
-          />
+          <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
         </View>
         <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     marginTop: Platform.OS === "ios" ? 0 : -12,
-    paddingLeft: 10,
+    paddingRight: 10,
     color: "#05375a",
   },
   errorMsg: {

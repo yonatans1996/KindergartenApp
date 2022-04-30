@@ -10,7 +10,7 @@ function ChildGroups({ value, setValue, groups }) {
     let groupsArr = [];
     groups.forEach((group) => groupsArr.push({ label: group, value: group }));
     setData(groupsArr);
-  }, []);
+  }, [groups]);
 
   return (
     <Dropdown

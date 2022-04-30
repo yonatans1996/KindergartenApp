@@ -44,6 +44,7 @@ export default function HomeScreen() {
       .catch((error) => console.log("error fetching groups: ", error));
     groups = groups.groups_in_kindergarten;
     setGroups(groups);
+    return groups;
   };
 
   useEffect(() => {
@@ -93,7 +94,6 @@ export default function HomeScreen() {
           accessToken={user.accessToken}
           teacherGroup={user.group_name}
           getChildren={getChildren}
-          groups={groups}
           fetchGroups={fetchGroups}
         />
       </Modal>
@@ -108,12 +108,15 @@ export default function HomeScreen() {
           <Ionicons name="swap-vertical" color="black" size={20} />
           <Text>החליקו למעלה לרענון</Text>
         </View>
-        <View style={styles.date}>
-          <Ionicons name="calendar" color="#009387" size={20} />
-          <Text> {currentDate}</Text>
-          <Text> | נוכחים: {children.length} / </Text>
-          <Text>{attendance}</Text>
-        </View>
+        {!isLoadingChildren && (
+          <View style={styles.date}>
+            <Ionicons name="calendar" color="#009387" size={20} />
+            <Text> {currentDate}</Text>
+            <Text> | נוכחים: {children.length} / </Text>
+            <Text>{attendance}</Text>
+          </View>
+        )}
+
         {!isLoadingChildren ? (
           <Children
             children={children}
@@ -178,7 +181,6 @@ const styles = StyleSheet.create({
   date: {
     flexDirection: "row",
     textAlign: "right",
-    justifyContent: "flex-start",
     marginTop: -5,
     marginBottom: 5,
   },

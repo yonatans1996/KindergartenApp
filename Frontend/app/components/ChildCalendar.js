@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Text } from "react-native-paper";
 import { Calendar } from "react-native-calendars";
+import Feather from "react-native-vector-icons/Feather";
 export default function ChildCalendar({ childInfo, accessToken }) {
-  const vacation = { key: "vacation", color: "red", selectedDotColor: "blue" };
-  const massage = { key: "massage", color: "blue", selectedDotColor: "blue" };
-  const workout = { key: "workout", color: "green" };
   const [datesObj, setDatesObj] = useState({});
   const monthNames = [
     "ינואר",
@@ -21,7 +19,8 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     "דצמבר",
   ];
 
-  const createCalendarObj = async () => {
+  const createCalendarObj = async (month) => {
+    console.log("GOT MONTH = ", month);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
 
@@ -30,12 +29,14 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       headers: myHeaders,
       redirect: "follow",
     };
-
-    const respond = await fetch(
+    let url =
       "https://api.kindergartenil.com/attendance?child_id=" +
-        childInfo.child_id,
-      requestOptions
-    )
+      childInfo.child_id;
+    if (month) {
+      url += "&month=" + month;
+    }
+    console.log("URL " + url);
+    const respond = await fetch(url, requestOptions)
       .then((response) => response.json())
       .catch((error) => console.log("error getting calendar dates: ", error));
 
@@ -52,7 +53,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       let newDate = buildSingleObj(date, "orange");
       datesObj = { ...datesObj, ...newDate };
     });
-    return datesObj;
+    setDatesObj(datesObj);
     /*
  "2022-03-20": {
           customStyles: {
@@ -96,13 +97,10 @@ export default function ChildCalendar({ childInfo, accessToken }) {
   };
 
   useEffect(() => {
-    createCalendarObj().then((res) => {
-      setDatesObj(res);
-    });
+    createCalendarObj();
   }, []);
   return (
     <Calendar
-      hideArrows={true}
       hideExtraDays={true}
       renderHeader={(date) => (
         <Text>
@@ -110,8 +108,19 @@ export default function ChildCalendar({ childInfo, accessToken }) {
           {monthNames[date.getMonth()]}
         </Text>
       )}
+      renderArrow={(direction) => (
+        <Feather
+          name={direction === "right" ? "arrow-left" : "arrow-right"}
+          color="green"
+          size={20}
+        />
+      )}
       markingType={"custom"}
       markedDates={datesObj}
+      onMonthChange={(date) => {
+        console.log("month changed", date);
+        createCalendarObj(date.month);
+      }}
     />
   );
 }

@@ -32,7 +32,7 @@ export default function SplashScreen({ navigation }) {
         />
       </View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-        <Text style={styles.title}>ברוכים הבאים!</Text>
+        <Text style={styles.title}>ברוכים הבאים לגן!</Text>
         <Text style={styles.text}>התחברו או הירשמו</Text>
         <View style={styles.buttons}>
           <View style={styles.button}>

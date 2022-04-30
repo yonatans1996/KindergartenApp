@@ -173,7 +173,6 @@ const Groups = () => {
 
   useEffect(() => {
     fetchGroups();
-    console.log("Groups added.");
   }, []);
 
   return (
@@ -222,7 +221,7 @@ const Groups = () => {
       {showNewGroupInput ? (
         <View
           style={{
-            flexDirection: "row-reverse",
+            flexDirection: "row",
             alignItems: "center",
             backgroundColor: "#fff",
             borderRadius: 5,
@@ -253,7 +252,7 @@ const Groups = () => {
       {showDeleteInput ? (
         <View
           style={{
-            flexDirection: "row-reverse",
+            flexDirection: "row",
             alignItems: "center",
             backgroundColor: "#fff",
             borderRadius: 5,

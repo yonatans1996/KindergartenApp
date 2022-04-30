@@ -22,7 +22,6 @@ export default function AddChildModal({
   modalVisible,
   accessToken,
   getChildren,
-  groups,
   teacherGroup,
   fetchGroups,
 }) {
@@ -33,6 +32,7 @@ export default function AddChildModal({
     parent2Phone: false,
   });
   const [selectedGroup, setGroup] = useState(teacherGroup);
+  const [groups, setGroups] = useState([]);
 
   const submitChild = () => {
     console.log("access token = ", accessToken);
@@ -66,8 +66,7 @@ export default function AddChildModal({
   };
 
   useEffect(() => {
-    // console.log(Dimensions.get("window"));
-    fetchGroups();
+    fetchGroups().then((groups) => setGroups(groups));
   }, []);
   return (
     <KeyboardAvoidingView
@@ -78,29 +77,28 @@ export default function AddChildModal({
         <Animatable.View style={styles.footer} animation="fadeInUpBig">
           <Text style={styles.text_footer}>שם פרטי</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
             <TextInput
               placeholder=""
               style={styles.textInput}
               autoCapitalize="none"
               onChangeText={(val) => setData({ ...data, firstName: val })}
             />
+            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>שם משפחה</Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
             <TextInput
               placeholder=""
               style={styles.textInput}
               autoCapitalize="none"
               onChangeText={(val) => setData({ ...data, lastName: val })}
             />
+            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>
             טלפון הורה 1
           </Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
             <TextInput
               keyboardType="phone-pad"
               placeholder=""
@@ -109,12 +107,12 @@ export default function AddChildModal({
               onChangeText={(val) => setData({ ...data, parent1Phone: val })}
               maxLength={10}
             />
+            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>
             טלפון הורה 2
           </Text>
           <View style={styles.action}>
-            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
             <TextInput
               keyboardType="phone-pad"
               placeholder=""
@@ -123,6 +121,7 @@ export default function AddChildModal({
               onChangeText={(val) => setData({ ...data, parent2Phone: val })}
               maxLength={10}
             />
+            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
           </View>
           <Text style={[{ marginTop: 35 }, styles.text_footer]}>
             קבוצת הילד/ה
@@ -134,6 +133,16 @@ export default function AddChildModal({
           />
           <View style={styles.buttons}>
             <TouchableOpacity
+              style={[styles.button]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <View
+                style={[styles.signIn, { borderWidth: 2, borderColor: "red" }]}
+              >
+                <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
               style={styles.button}
               onPress={() => submitChild()}
             >
@@ -143,16 +152,6 @@ export default function AddChildModal({
               >
                 <Text style={[styles.textSign, { color: "white" }]}>הוספה</Text>
               </LinearGradient>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button]}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <View
-                style={[styles.signIn, { borderWidth: 2, borderColor: "red" }]}
-              >
-                <Text style={[styles.textSign, { color: "red" }]}>ביטול</Text>
-              </View>
             </TouchableOpacity>
           </View>
         </Animatable.View>
