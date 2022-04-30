@@ -20,6 +20,7 @@ import * as Animatable from "react-native-animatable";
 import { text } from "@fortawesome/fontawesome-svg-core";
 import * as AWS from "aws-sdk/global";
 import md5 from "react-native-md5";
+import Checkbox from "expo-checkbox";
 import { AuthContext } from "../Context/AuthContext";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
@@ -31,6 +32,7 @@ export default function SignInScreen({ navigation }) {
     showPass: false,
   });
   const { user, setUser } = useContext(AuthContext);
+  const [rememberUser, setRememberUser] = useState(true);
   const handlePassword = (val) => {
     setData({ ...data, password: val });
   };
@@ -128,6 +130,7 @@ export default function SignInScreen({ navigation }) {
           />
           <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
         </View>
+        <Checkbox value={rememberUser} onValueChange={setRememberUser} />
         <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
             <Text style={[styles.textSign, { color: "white" }]}>התחברות</Text>
