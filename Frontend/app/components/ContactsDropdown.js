@@ -3,41 +3,69 @@ import { StyleSheet } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
-function ChildGroups({ value, setValue, groups }) {
+function ContactsDropDown({ contacts, value, setValue, setId }) {
   const [isFocus, setIsFocus] = useState(false);
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    let groupsArr = [];
-    groups.forEach((group) => groupsArr.push({ label: group, value: group }));
-    setData(groupsArr);
-    console.log("Rendered child groups in add child modal");
-  }, [groups]);
+  useEffect(() => {});
 
   return (
+    // <Dropdown
+    //   style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
+    //   placeholderStyle={styles.placeholderStyle}
+    //   selectedTextStyle={styles.selectedTextStyle}
+    //   search
+    //   searchPlaceholder="חפש איש קשר"
+    //   inputSearchStyle={styles.inputSearchStyle}
+    //   iconStyle={styles.iconStyle}
+    //   data={contacts}
+    //   maxHeight={300}
+    //   labelField="label"
+    //   valueField="value"
+    //   placeholder="אנשי קשר"
+    //   value={value}
+    //   onFocus={() => setIsFocus(true)}
+    //   onBlur={() => {
+    //     setIsFocus(false);
+    //   }}
+    //   onChange={(item) => {
+    //     setIsFocus(false);
+    //     setId(item.value);
+    //     setValue(item.label);
+    //   }}
+    //   renderLeftIcon={() => (
+    //     <AntDesign
+    //       style={styles.icon}
+    //       color={isFocus ? "blue" : "black"}
+    //       name="team"
+    //       size={20}
+    //     />
+    //   )}
+    // />
     <Dropdown
       style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
       placeholderStyle={styles.placeholderStyle}
       selectedTextStyle={styles.selectedTextStyle}
+      inputSearchStyle={styles.inputSearchStyle}
       iconStyle={styles.iconStyle}
-      data={data}
+      data={contacts}
+      search
       maxHeight={300}
       labelField="label"
       valueField="value"
-      placeholder="בחר קבוצה"
+      placeholder={!isFocus ? "אנשי קשר" : "..."}
+      searchPlaceholder="Search..."
       value={value}
       onFocus={() => setIsFocus(true)}
-      onBlur={() => {
-        setIsFocus(false);
-      }}
+      onBlur={() => setIsFocus(false)}
       onChange={(item) => {
+        setValue(item.value);
+        setId(item.value);
         setIsFocus(false);
-        setValue(item.label);
       }}
       renderLeftIcon={() => (
         <AntDesign
           style={styles.icon}
           color={isFocus ? "blue" : "black"}
-          name="team"
+          name="contacts"
           size={20}
         />
       )}
@@ -84,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChildGroups;
+export default ContactsDropDown;

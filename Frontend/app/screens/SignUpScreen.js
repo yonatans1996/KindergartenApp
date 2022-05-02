@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 import { useState, useContext } from "react";
-import * as React from "react";
+import React, { useRef } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import {
   faUser,
@@ -29,7 +29,10 @@ const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreen({ navigation }) {
   const [checked, setChecked] = React.useState("first");
-
+  const firstNameRef = useRef();
+  const lastNameRef = useRef();
+  const phoneRef = useRef();
+  const passRef = useRef();
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -208,9 +211,15 @@ export default function SignUpScreen({ navigation }) {
 
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
         <ScrollView>
-          <Text style={styles.text_footer}>שם פרטי</Text>
+          <Text
+            style={styles.text_footer}
+            onPress={() => firstNameRef.current.focus()}
+          >
+            שם פרטי
+          </Text>
           <View style={styles.action}>
             <TextInput
+              ref={firstNameRef}
               placeholder=""
               style={styles.textInput}
               autoCapitalize="none"
@@ -221,14 +230,25 @@ export default function SignUpScreen({ navigation }) {
                 <Feather name="check-circle" color="green" size={20} />
               </Animatable.View>
             ) : null}
-            <FontAwesomeIcon icon={faUser} color="#05375a" size={20} />
+            <FontAwesomeIcon
+              icon={faUser}
+              color="#05375a"
+              size={20}
+              onPress={() => firstNameRef.current.focus()}
+            />
           </View>
-          <Text style={[{ marginTop: 35 }, styles.text_footer]}>שם משפחה</Text>
+          <Text
+            style={[{ marginTop: 35 }, styles.text_footer]}
+            onPress={() => lastNameRef.current.focus()}
+          >
+            שם משפחה
+          </Text>
           <View style={styles.action}>
             <TextInput
               placeholder=""
               style={styles.textInput}
               autoCapitalize="none"
+              ref={lastNameRef}
               onChangeText={(val) => lastNameInputChange(val)}
             />
             {data.checkLastName ? (
@@ -236,9 +256,19 @@ export default function SignUpScreen({ navigation }) {
                 <Feather name="check-circle" color="green" size={20} />
               </Animatable.View>
             ) : null}
-            <FontAwesomeIcon icon={faUsers} color="#05375a" size={20} />
+            <FontAwesomeIcon
+              icon={faUsers}
+              color="#05375a"
+              size={20}
+              onPress={() => lastNameRef.current.focus()}
+            />
           </View>
-          <Text style={[{ marginTop: 35 }, styles.text_footer]}>טלפון</Text>
+          <Text
+            style={[{ marginTop: 35 }, styles.text_footer]}
+            onPress={() => phoneRef.current.focus()}
+          >
+            טלפון
+          </Text>
           <View style={styles.action}>
             {data.checkPhone ? (
               <Animatable.View animation="bounceIn">
@@ -250,13 +280,24 @@ export default function SignUpScreen({ navigation }) {
               placeholder=""
               style={styles.textInput}
               autoCapitalize="none"
+              ref={phoneRef}
               onChangeText={(val) => phoneInputChange(val)}
               maxLength={10}
             />
 
-            <FontAwesomeIcon icon={faPhone} color="#05375a" size={20} />
+            <FontAwesomeIcon
+              icon={faPhone}
+              color="#05375a"
+              size={20}
+              onPress={() => phoneRef.current.focus()}
+            />
           </View>
-          <Text style={[{ marginTop: 35 }, styles.text_footer]}>סיסמה</Text>
+          <Text
+            style={[{ marginTop: 35 }, styles.text_footer]}
+            onPress={() => passRef.current.focus()}
+          >
+            סיסמה
+          </Text>
           <View style={styles.action}>
             <Feather
               name={data.showPass ? "eye" : "eye-off"}
@@ -279,9 +320,15 @@ export default function SignUpScreen({ navigation }) {
               secureTextEntry={!data.showPass}
               style={styles.textInput}
               autoCapitalize="none"
+              ref={passRef}
               onChangeText={(pass) => handlePassword(pass)}
             />
-            <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
+            <FontAwesomeIcon
+              icon={faLock}
+              color="#05375a"
+              size={20}
+              onPress={() => passRef.current.focus()}
+            />
           </View>
           <View style={[styles.radioBox, { marginTop: 35 }]}>
             <Text

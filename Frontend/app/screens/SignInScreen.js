@@ -9,7 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import MaterialIcons from "react-native-vector-icons";
@@ -22,6 +22,7 @@ import * as AWS from "aws-sdk/global";
 import md5 from "react-native-md5";
 import Checkbox from "expo-checkbox";
 import { AuthContext } from "../Context/AuthContext";
+import * as SecureStore from "expo-secure-store";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignInScreen({ navigation }) {
@@ -33,6 +34,8 @@ export default function SignInScreen({ navigation }) {
   });
   const { user, setUser } = useContext(AuthContext);
   const [rememberUser, setRememberUser] = useState(true);
+  const phoneRef = useRef();
+  const passRef = useRef();
   const handlePassword = (val) => {
     setData({ ...data, password: val });
   };
@@ -46,6 +49,16 @@ export default function SignInScreen({ navigation }) {
       setData({ ...data, phone: val, checkPhone: false });
     }
   };
+  async function saveUserToDevice(key, value) {
+    await SecureStore.setItemAsync(key, value);
+  }
+  async function getUserFromDevice(key) {
+    return SecureStore.getItemAsync(key);
+  }
+  async function deleteUserFromDevice(key) {
+    let result = await SecureStore.deleteItemAsync(key);
+    console.log("Deleted key: ", key, "result: ", result);
+  }
   const handleSignIn = () => {
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
@@ -72,6 +85,10 @@ export default function SignInScreen({ navigation }) {
         console.log("accessToken = ", accessToken);
         console.log("REsult = ", JSON.stringify(result));
         setUser({ accessToken });
+        if (rememberUser) {
+          saveUserToDevice("password", data.password);
+        }
+        saveUserToDevice("phone", data.phone);
       },
 
       onFailure: function (err) {
@@ -80,8 +97,19 @@ export default function SignInScreen({ navigation }) {
       },
     });
   };
+
   useEffect(() => {
     console.log("Rendered SignInScreen");
+    getUserFromDevice("password").then((result) => {
+      setData((prevState) => {
+        return { ...prevState, password: result };
+      });
+    });
+    getUserFromDevice("phone").then((result) =>
+      setData((prevState) => {
+        return { ...prevState, phone: result };
+      })
+    );
   }, []);
   return (
     <View style={styles.container}>
@@ -90,7 +118,12 @@ export default function SignInScreen({ navigation }) {
         <Text style={styles.text_header}>ברוכים השבים!</Text>
       </View>
       <Animatable.View style={styles.footer} animation="fadeInUpBig">
-        <Text style={styles.text_footer}>טלפון</Text>
+        <Text
+          style={styles.text_footer}
+          onPress={() => phoneRef.current.focus()}
+        >
+          טלפון
+        </Text>
         <View style={styles.action}>
           {data.checkPhone ? (
             <Animatable.View animation="bounceIn">
@@ -99,8 +132,10 @@ export default function SignInScreen({ navigation }) {
           ) : null}
           <TextInput
             maxLength={10}
+            ref={phoneRef}
             keyboardType="phone-pad"
             placeholder=""
+            value={data.phone}
             style={styles.textInput}
             autoCapitalize="none"
             onChangeText={(val) => phoneInputChange(val)}
@@ -110,9 +145,15 @@ export default function SignInScreen({ navigation }) {
             color="#05375a"
             size={20}
             style={{ marginRight: 5 }}
+            onPress={() => phoneRef.current.focus()}
           />
         </View>
-        <Text style={[{ marginTop: 35 }, styles.text_footer]}>סיסמה</Text>
+        <Text
+          style={[{ marginTop: 35 }, styles.text_footer]}
+          onPress={() => passRef.current.focus()}
+        >
+          סיסמה
+        </Text>
         <View style={styles.action}>
           <Feather
             style={{ paddingRight: 5 }}
@@ -124,13 +165,43 @@ export default function SignInScreen({ navigation }) {
           <TextInput
             placeholder=""
             secureTextEntry={!data.showPass}
+            value={data.password}
             style={styles.textInput}
+            ref={passRef}
             autoCapitalize="none"
             onChangeText={(pass) => handlePassword(pass)}
           />
-          <FontAwesomeIcon icon={faLock} color="#05375a" size={20} />
+          <FontAwesomeIcon
+            icon={faLock}
+            color="#05375a"
+            size={20}
+            onPress={() => passRef.current.focus()}
+          />
         </View>
-        <Checkbox value={rememberUser} onValueChange={setRememberUser} />
+        <View
+          style={{
+            flexDirection: "row",
+            marginTop: 15,
+            alignItems: "center",
+          }}
+        >
+          <Checkbox
+            value={rememberUser}
+            onValueChange={(val) => {
+              setRememberUser(val);
+              if (!val) deleteUserFromDevice("password");
+            }}
+          />
+          <Text
+            onPress={() => setRememberUser(!rememberUser)}
+            style={{
+              paddingRight: 5,
+            }}
+          >
+            זכור אותי
+          </Text>
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
             <Text style={[styles.textSign, { color: "white" }]}>התחברות</Text>
