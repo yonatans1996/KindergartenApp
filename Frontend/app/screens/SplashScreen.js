@@ -35,13 +35,14 @@ export default function SplashScreen({ navigation }) {
         <Text style={styles.title}>ברוכים הבאים לגן!</Text>
         <Text style={styles.text}>התחברו או הירשמו</Text>
         <View style={styles.buttons}>
-          <View style={styles.button}>
+          <View style={[styles.button, { width: "100%" }]}>
             <TouchableOpacity
+              style={{ width: "100%" }}
               onPress={() => navigation.navigate("SignInScreen")}
             >
               <LinearGradient
                 colors={["#08d4c4", "#01ab9d"]}
-                style={styles.signIn}
+                style={[styles.signIn, { width: "100%" }]}
               >
                 <Text style={styles.textSign}>כניסה</Text>
               </LinearGradient>
@@ -55,7 +56,19 @@ export default function SplashScreen({ navigation }) {
                 colors={["#08d4c4", "#01ab9d"]}
                 style={styles.signIn}
               >
-                <Text style={styles.textSign}>הרשמה</Text>
+                <Text style={styles.textSign}>הרשמה כגננת</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.button}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SignUpParent")}
+            >
+              <LinearGradient
+                colors={["#08d4c4", "#01ab9d"]}
+                style={styles.signIn}
+              >
+                <Text style={styles.textSign}>הרשמה כהורה</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -118,5 +131,6 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: "row",
     justifyContent: "space-between",
+    flexWrap: "wrap",
   },
 });

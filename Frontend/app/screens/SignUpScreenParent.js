@@ -27,7 +27,7 @@ import md5 from "react-native-md5";
 import { AuthContext } from "../Context/AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
-export default function SignUpScreen({ navigation }) {
+export default function SignUpScreenParent({ navigation }) {
   const [checked, setChecked] = React.useState("first");
   const firstNameRef = useRef();
   const lastNameRef = useRef();
@@ -198,7 +198,7 @@ export default function SignUpScreen({ navigation }) {
       .then((response) => response.text())
       .then((result) => {
         console.log("added teacher to db succsessfuly");
-        setUser({ accessToken, type: "teacher" });
+        setUser({ accessToken, type: "parent" });
       })
       .catch((error) => console.log("error", error));
   };
@@ -237,32 +237,7 @@ export default function SignUpScreen({ navigation }) {
               onPress={() => firstNameRef.current.focus()}
             />
           </View>
-          <Text
-            style={[{ marginTop: 35 }, styles.text_footer]}
-            onPress={() => lastNameRef.current.focus()}
-          >
-            שם משפחה
-          </Text>
-          <View style={styles.action}>
-            <TextInput
-              placeholder=""
-              style={styles.textInput}
-              autoCapitalize="none"
-              ref={lastNameRef}
-              onChangeText={(val) => lastNameInputChange(val)}
-            />
-            {data.checkLastName ? (
-              <Animatable.View animation="bounceIn">
-                <Feather name="check-circle" color="green" size={20} />
-              </Animatable.View>
-            ) : null}
-            <FontAwesomeIcon
-              icon={faUsers}
-              color="#05375a"
-              size={20}
-              onPress={() => lastNameRef.current.focus()}
-            />
-          </View>
+
           <Text
             style={[{ marginTop: 35 }, styles.text_footer]}
             onPress={() => phoneRef.current.focus()}
@@ -330,19 +305,7 @@ export default function SignUpScreen({ navigation }) {
               onPress={() => passRef.current.focus()}
             />
           </View>
-          <View style={[styles.radioBox, { marginTop: 35 }]}>
-            <Text
-              onPress={() => setChecked("first")}
-              style={styles.text_footer}
-            >
-              יצירת גן חדש
-            </Text>
-            <RadioButton
-              value="first"
-              status={checked === "first" ? "checked" : "unchecked"}
-              onPress={() => setChecked("first")}
-            />
-          </View>
+          <View style={[styles.radioBox, { marginTop: 35 }]}></View>
           {checked === "first" && (
             <Animatable.View style={styles.action} animation="slideInUp">
               <TextInput
@@ -369,7 +332,7 @@ export default function SignUpScreen({ navigation }) {
               onPress={() => setChecked("second")}
               style={styles.text_footer}
             >
-              הצטרפות לגן קיים
+              מספר מזהה של הגן
             </Text>
             <RadioButton
               value="first"
@@ -380,7 +343,7 @@ export default function SignUpScreen({ navigation }) {
           {checked === "second" && (
             <Animatable.View style={styles.action} animation="slideInDown">
               <TextInput
-                placeholder="מספר מזהה של הגן"
+                placeholder="אם לא ידוע לכם, בקשו מהגננת"
                 style={[styles.textInput, { marginTop: 0 }]}
                 autoCapitalize="none"
                 maxLength={8}

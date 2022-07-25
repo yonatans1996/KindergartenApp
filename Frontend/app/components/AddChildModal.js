@@ -93,7 +93,8 @@ export default function AddChildModal({
 
         if (data.length > 0) {
           let contacts = data.map((obj) => {
-            return { label: obj.firstName, value: obj.id };
+            obj.lastName = obj.lastName ? obj.lastName : "";
+            return { label: `${obj.firstName} ${obj.lastName}`, value: obj.id };
           });
 
           setRawContacts(data);

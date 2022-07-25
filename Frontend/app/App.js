@@ -9,6 +9,7 @@ import { I18nManager } from "react-native";
 I18nManager.forceRTL(true);
 I18nManager.allowRTL(true);
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
+import ParentScreen from "./screens/ParentScreen";
 
 export default function App() {
   const [user, setUser] = useState({});
@@ -75,6 +76,27 @@ export default function App() {
   useEffect(() => {
     LogBox.ignoreLogs(["numColumns"]);
   }, []);
+
+  const renderScreen = () => {
+    // return <ParentScreen />;
+    if (user.accessToken && user.type !== "parent")
+      return (
+        <NavigationContainer>
+          <Tabs />
+        </NavigationContainer>
+      );
+    if (user.accessToken) {
+      return <ParentScreen />;
+    }
+    return (
+      <PaperProvider>
+        <NavigationContainer>
+          <StatusBar backgroundColor="#009387" barStyle="light-content" />
+          <RootStackScreen />
+        </NavigationContainer>
+      </PaperProvider>
+    );
+  };
   return (
     <AuthContext.Provider
       value={{
@@ -88,18 +110,7 @@ export default function App() {
         isLoadingChildren,
       }}
     >
-      {user.accessToken ? (
-        <NavigationContainer>
-          <Tabs />
-        </NavigationContainer>
-      ) : (
-        <PaperProvider>
-          <NavigationContainer>
-            <StatusBar backgroundColor="#009387" barStyle="light-content" />
-            <RootStackScreen />
-          </NavigationContainer>
-        </PaperProvider>
-      )}
+      {renderScreen()}
     </AuthContext.Provider>
   );
 }

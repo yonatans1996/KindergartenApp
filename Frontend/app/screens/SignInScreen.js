@@ -209,9 +209,9 @@ export default function SignInScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.singUp}
-          onPress={() => navigation.navigate("SignUpScreen")}
+          onPress={() => navigation.navigate("SplashScreen")}
         >
-          <Text style={[styles.textSign, { color: "#009387" }]}>הרשמה</Text>
+          <Text style={[styles.textSign, { color: "#009387" }]}>חזרה</Text>
         </TouchableOpacity>
       </Animatable.View>
     </View>

@@ -6,7 +6,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  KeyboardAvoidingView,
   ImageBackground,
   Alert,
   ActivityIndicator,
@@ -15,11 +14,6 @@ import Feather from "react-native-vector-icons/Feather";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { faCamera } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import * as FileSystem from "expo-file-system";
-import base64 from "react-native-base64";
-import axios from "axios";
 import * as mime from "react-native-mime-types";
 import * as ImageManipulator from "expo-image-manipulator";
 import ChildCalendar from "./ChildCalendar";

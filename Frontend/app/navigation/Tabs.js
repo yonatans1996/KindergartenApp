@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "../screens/HomeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
-import ChatScreen from "../screens/ChatScreen";
+import ReportsScreen from "../screens/ReportsScreen";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faHome, faGear, faComment } from "@fortawesome/free-solid-svg-icons";
 import { View, Text } from "react-native";
@@ -34,8 +34,8 @@ const Tabs = () => {
         }}
       />
       <Tab.Screen
-        name="צ'אט"
-        component={ChatScreen}
+        name="דוחות"
+        component={ReportsScreen}
         options={{
           tabBarIcon: ({ focused }) => (
             <View>
