@@ -51,14 +51,42 @@ export default function AddChildModal({
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
+    console.log(data);
+    let phone1WithoutPrefix = "";
+    let phone2WithoutPrefix = "";
+    if (data.parent1Phone) {
+      phone1WithoutPrefix = data.parent1Phone
+        .replace(/[- +]/g, "")
+        .replace(/^972/, "");
+    }
+    if (data.parent2Phone) {
+      phone2WithoutPrefix = data.parent2Phone
+        .replace(/[- +]/g, "")
+        .replace(/^972/, "");
+    }
+    if (phone1WithoutPrefix) {
+      phone1WithoutPrefix = `+972${
+        phone1WithoutPrefix[0] === 0
+          ? phone1WithoutPrefix.slice(1, phone1WithoutPrefix.length)
+          : phone1WithoutPrefix
+      }`;
+    }
+    if (phone2WithoutPrefix) {
+      phone2WithoutPrefix = `+972${
+        phone2WithoutPrefix[0] === 0
+          ? phone2WithoutPrefix.slice(1, phone2WithoutPrefix.length)
+          : phone2WithoutPrefix
+      }`;
+    }
 
     var raw = JSON.stringify({
       first_name: data.firstName,
       last_name: data.lastName,
-      parent1_phone_number: data.parent1Phone,
-      parent2_phone_number: data.parent2Phone,
+      parent1_phone_number: phone1WithoutPrefix,
+      parent2_phone_number: phone2WithoutPrefix,
       group_name: selectedGroup,
     });
+    console.log("saving child with the following data: ", raw);
 
     var requestOptions = {
       method: "POST",
@@ -70,7 +98,7 @@ export default function AddChildModal({
     fetch("https://api.kindergartenil.com/children", requestOptions)
       .then((response) => response.json())
       .then((result) => {
-        console.log(result);
+        console.log("Children added. result = ", result);
         getChildren();
       })
       .catch((error) => console.log("error", error));
@@ -83,13 +111,10 @@ export default function AddChildModal({
       const { status } = await Contacts.requestPermissionsAsync();
       if (status === "granted") {
         let { data } = await Contacts.getContactsAsync();
-
-        console.log("before = ", data.length);
         data = data.filter(
           (obj) =>
             obj.firstName && obj.phoneNumbers && obj.phoneNumbers.length > 0
         );
-        console.log("after = ", data.length);
 
         if (data.length > 0) {
           let contacts = data.map((obj) => {

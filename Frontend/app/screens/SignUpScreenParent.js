@@ -28,26 +28,18 @@ import { AuthContext } from "../Context/AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreenParent({ navigation }) {
-  const [checked, setChecked] = React.useState("first");
   const firstNameRef = useRef();
-  const lastNameRef = useRef();
   const phoneRef = useRef();
   const passRef = useRef();
   const [data, setData] = useState({
-    email: "",
     password: "",
     checkPassword: false,
     checkFirstName: false,
-    checkLastName: false,
     checkPhone: false,
     showPass: false,
-    checkKinderName: false,
     firstName: "",
     lastName: "",
     phone: "",
-    kinderName: "",
-    kindergartenId: "",
-    checkKindergartenId: false,
   });
   const { user, setUser } = useContext(AuthContext);
   const firstNameInputChange = (val) => {
@@ -55,13 +47,6 @@ export default function SignUpScreenParent({ navigation }) {
       setData({ ...data, firstName: val, checkFirstName: true });
     } else {
       setData({ ...data, firstName: val, checkFirstName: false });
-    }
-  };
-  const lastNameInputChange = (val) => {
-    if (val.length > 1) {
-      setData({ ...data, lastName: val, checkLastName: true });
-    } else {
-      setData({ ...data, lastName: val, checkLastName: false });
     }
   };
   const phoneInputChange = (val) => {
@@ -77,42 +62,10 @@ export default function SignUpScreenParent({ navigation }) {
   const showPassword = () => {
     setData({ ...data, showPass: !data.showPass });
   };
-  const newKindergartenHandle = async (val) => {
-    let isKinderId = val.length === 8 ? await isKinderIdExists(val) : false;
-    console.log("checked = ", checked);
-    setData({ ...data, kindergartenId: val, checkKindergartenId: isKinderId });
-  };
-  const kinderNameHandle = (val) => {
-    let checked = val.length > 1;
-    setData({ ...data, kinderName: val, checkKinderName: checked });
-  };
-  const isKinderIdExists = async (kinderId) => {
-    var requestOptions = {
-      method: "GET",
-      redirect: "follow",
-    };
 
-    const result = await fetch(
-      "https://api.kindergartenil.com/kindergarten/exist?kindergarten_id=" +
-        kinderId,
-      requestOptions
-    )
-      .then((response) => response.json())
-      .catch((error) =>
-        console.log("error checking if kindergarten id exists: ", error)
-      );
-    console.log(result);
-    return result;
-  };
   const handleRegister = () => {
-    if (
-      !data.checkFirstName ||
-      !data.checkLastName ||
-      !data.checkPhone ||
-      !data.checkPassword ||
-      (checked === "second" && !data.checkKindergartenId) ||
-      (checked === "first" && !data.checkKinderName)
-    ) {
+    console.log(data);
+    if (!data.checkFirstName || !data.checkPhone || !data.checkPassword) {
       Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך");
       return;
     }
@@ -135,6 +88,7 @@ export default function SignUpScreenParent({ navigation }) {
       handleSignIn();
     });
   };
+
   const handleSignIn = () => {
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
@@ -157,11 +111,11 @@ export default function SignUpScreenParent({ navigation }) {
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
-        // var accessToken = result.getAccessToken().getJwtToken();
         var accessToken = result.getIdToken().getJwtToken();
         console.log("accesstoken = ", accessToken);
         console.log("login after sign up successfully");
-        addTeacherToDB(accessToken);
+        // addParentToDB(accessToken);
+        setUser({ accessToken, type: "parent" });
       },
 
       onFailure: function (err) {
@@ -170,20 +124,15 @@ export default function SignUpScreenParent({ navigation }) {
       },
     });
   };
-  const addTeacherToDB = (accessToken) => {
-    console.log("adding teacher to db");
+  const addParentToDB = (accessToken) => {
+    console.log("adding parent to db");
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
-    if (checked === "first") {
-      data.kindergartenId = null;
-    }
+    const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
     var raw = JSON.stringify({
       first_name: data.firstName,
-      last_name: data.lastName,
-      kindergarten_id: data.kindergartenId,
-      group_number: "1",
-      kindergarten_name: data.kinderName,
+      phone: phoneWithPrefix,
     });
 
     var requestOptions = {
@@ -197,7 +146,7 @@ export default function SignUpScreenParent({ navigation }) {
     fetch("https://api.kindergartenil.com/teacher/signup", requestOptions)
       .then((response) => response.text())
       .then((result) => {
-        console.log("added teacher to db succsessfuly");
+        console.log("added teacher to db succsessfuly. result = ", result);
         setUser({ accessToken, type: "parent" });
       })
       .catch((error) => console.log("error", error));
@@ -306,73 +255,6 @@ export default function SignUpScreenParent({ navigation }) {
             />
           </View>
           <View style={[styles.radioBox, { marginTop: 35 }]}></View>
-          {checked === "first" && (
-            <Animatable.View style={styles.action} animation="slideInUp">
-              <TextInput
-                placeholder="שם הגן"
-                style={[styles.textInput, { marginTop: 0 }]}
-                autoCapitalize="none"
-                onChangeText={(val) => kinderNameHandle(val)}
-              />
-              {data.checkKinderName ? (
-                <Animatable.View animation="bounceIn">
-                  <Feather
-                    name="check-circle"
-                    color="green"
-                    size={20}
-                    style={{ paddingLeft: 8 }}
-                  />
-                </Animatable.View>
-              ) : null}
-            </Animatable.View>
-          )}
-
-          <View style={styles.radioBox}>
-            <Text
-              onPress={() => setChecked("second")}
-              style={styles.text_footer}
-            >
-              מספר מזהה של הגן
-            </Text>
-            <RadioButton
-              value="first"
-              status={checked === "second" ? "checked" : "unchecked"}
-              onPress={() => setChecked("second")}
-            />
-          </View>
-          {checked === "second" && (
-            <Animatable.View style={styles.action} animation="slideInDown">
-              <TextInput
-                placeholder="אם לא ידוע לכם, בקשו מהגננת"
-                style={[styles.textInput, { marginTop: 0 }]}
-                autoCapitalize="none"
-                maxLength={8}
-                onChangeText={(val) => newKindergartenHandle(val)}
-              />
-              {data.checkKindergartenId ? (
-                <Animatable.View animation="bounceIn">
-                  <Feather
-                    name="check-circle"
-                    color="green"
-                    size={20}
-                    style={{ paddingLeft: 8 }}
-                  />
-                </Animatable.View>
-              ) : null}
-              {data.checkKindergartenId == false &&
-              data.kindergartenId.length === 8 ? (
-                <Animatable.View animation="bounceIn">
-                  <Feather
-                    name="x-circle"
-                    color="red"
-                    size={20}
-                    style={{ paddingLeft: 8 }}
-                  />
-                </Animatable.View>
-              ) : null}
-            </Animatable.View>
-          )}
-
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleRegister()}

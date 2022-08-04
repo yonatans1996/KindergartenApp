@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ChildCalendar from "../components/ChildCalendar";
 export default function ParentScreen() {
+  const { user, setUser } = useContext(AuthContext);
   const [image, setImage] = useState(null);
   const [isUpload, setUpload] = useState(false);
   const childInfo = { child_id: "0b0b78ec-d179-42ec-ba05-21b8b22be349" };
@@ -23,16 +24,6 @@ export default function ParentScreen() {
     setChildEditModal(!childEditModal);
   };
 
-  const deleteConfirmationAlert = () =>
-    Alert.alert("האם למחוק ילד/ה?", "פעולה זו אינה הפיכה", [
-      {
-        text: "לא",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel",
-      },
-      { text: "כן", onPress: () => deleteChild() },
-    ]);
-  //UIImagePickerControllerQualityType.IFrame1280x720
   const takePhotoFromCamera = async () => {
     let image = await ImagePicker.launchCameraAsync({
       mediaTypes: "Images",
@@ -121,8 +112,6 @@ export default function ParentScreen() {
   currentDate = `${currentDate.getDate()}/${
     currentDate.getMonth() + 1
   }/${currentDate.getFullYear().toString().slice(-2)}`;
-
-  useEffect(() => {}, []);
 
   return (
     <View style={styles.container}>
@@ -254,6 +243,7 @@ export default function ParentScreen() {
 
           <ChildCalendar childInfo={childInfo} accessToken={accessToken} />
         </View>
+        <Text onPress={() => setUser({})}>התנתקות</Text>
       </View>
     </View>
   );

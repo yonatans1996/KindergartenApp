@@ -50,6 +50,7 @@ export default function SignInScreen({ navigation }) {
     }
   };
   async function saveUserToDevice(key, value) {
+    console.log("saving key ", key, " with value ", value);
     await SecureStore.setItemAsync(key, value);
   }
   async function getUserFromDevice(key) {
@@ -86,7 +87,10 @@ export default function SignInScreen({ navigation }) {
         console.log("REsult = ", JSON.stringify(result));
         setUser({ accessToken });
         if (rememberUser) {
+          saveUserToDevice("rememberbox", "true");
           saveUserToDevice("password", data.password);
+        } else {
+          saveUserToDevice("rememberbox", "false");
         }
         saveUserToDevice("phone", data.phone);
       },
@@ -104,6 +108,10 @@ export default function SignInScreen({ navigation }) {
       setData((prevState) => {
         return { ...prevState, password: result };
       });
+    });
+    getUserFromDevice("rememberbox").then((result) => {
+      result = result == null ? true : result === "true";
+      setRememberUser(result);
     });
     getUserFromDevice("phone").then((result) =>
       setData((prevState) => {
@@ -188,12 +196,15 @@ export default function SignInScreen({ navigation }) {
           <Checkbox
             value={rememberUser}
             onValueChange={(val) => {
-              setRememberUser(val);
               if (!val) deleteUserFromDevice("password");
+              setRememberUser(val);
             }}
           />
           <Text
-            onPress={() => setRememberUser(!rememberUser)}
+            onPress={() => {
+              if (rememberUser) deleteUserFromDevice("password");
+              setRememberUser(!rememberUser);
+            }}
             style={{
               paddingRight: 5,
             }}
