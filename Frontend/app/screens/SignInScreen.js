@@ -84,7 +84,7 @@ export default function SignInScreen({ navigation }) {
       onSuccess: function (result) {
         var accessToken = result.getIdToken().getJwtToken();
         console.log("accessToken = ", accessToken);
-        setUser({ accessToken, type: "teacher" });
+        setUser({ accessToken, type: "parent" });
         if (rememberUser) {
           saveUserToDevice("rememberbox", "true");
           saveUserToDevice("password", data.password);

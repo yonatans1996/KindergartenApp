@@ -112,7 +112,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       is_present: message,
       kindergarten_id: childInfo.kindergarten_id,
     });
-
+    console.log("notify missing raw data = ", raw);
     var requestOptions = {
       method: "POST",
       headers: myHeaders,
@@ -152,7 +152,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
             },
             {
               text: "דיווח לא מגיע",
-              onPress: () => notifyMissing(day, "notified-missing"),
+              onPress: () => notifyMissing(day, "notifed_missing"),
             },
           ]
         );
