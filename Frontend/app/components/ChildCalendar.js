@@ -101,7 +101,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     };
     return obj;
   };
-  const notifyMissing = (day) => {
+  const notifyMissing = (day, message) => {
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
@@ -109,7 +109,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     var raw = JSON.stringify({
       date: `${day.year}-${day.month}-${day.day}`,
       child_id: childInfo.child_id,
-      is_present: "notified-missing",
+      is_present: message,
       kindergarten_id: childInfo.kindergarten_id,
     });
 
@@ -141,11 +141,19 @@ export default function ChildCalendar({ childInfo, accessToken }) {
           `תאריך: ${day.day}/${day.month}/${day.year}`,
           [
             {
-              text: "ביטול",
+              text: "חזרה",
               onPress: () => console.log("Cancel Pressed"),
               style: "cancel",
             },
-            { text: "דיווח לא מגיע", onPress: () => notifyMissing(day) },
+            {
+              text: "ביטול נוכחות",
+              onPress: () => notifyMissing(day, "no"),
+              style: "cancel",
+            },
+            {
+              text: "דיווח לא מגיע",
+              onPress: () => notifyMissing(day, "notified-missing"),
+            },
           ]
         );
       }}
