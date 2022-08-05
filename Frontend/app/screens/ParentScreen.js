@@ -9,20 +9,14 @@ import {
 } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
-import Children from "../components/Children";
 import { AuthContext } from "../Context/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ChildCalendar from "../components/ChildCalendar";
 export default function ParentScreen() {
   const { user, setUser } = useContext(AuthContext);
   const [image, setImage] = useState(null);
   const [isUpload, setUpload] = useState(false);
-  const childInfo = { child_id: "0b0b78ec-d179-42ec-ba05-21b8b22be349" };
-  const accessToken = "11";
-  const submitChild = () => {
-    setChildEditModal(!childEditModal);
-  };
+  const [childInfo, setChildInfo] = useState({});
 
   const takePhotoFromCamera = async () => {
     let image = await ImagePicker.launchCameraAsync({
@@ -45,7 +39,7 @@ export default function ParentScreen() {
   const uploadToS3 = async () => {
     setUpload(true);
     var myHeaders = new Headers();
-    myHeaders.append("Authorization", accessToken);
+    myHeaders.append("Authorization", user.accessToken);
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -113,10 +107,57 @@ export default function ParentScreen() {
     currentDate.getMonth() + 1
   }/${currentDate.getFullYear().toString().slice(-2)}`;
 
+  useEffect(() => {
+    console.log("parent screen with data = ", user);
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+
+    fetch("https://api.kindergartenil.com/parent", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        setUser({ ...user, ...result });
+        console.log("got parent result = ", { ...user, ...result });
+      })
+      .catch((error) => console.log("error getting parent. ", error));
+  }, []);
+
+  useEffect(() => {
+    getChild();
+  }, [user]);
+
+  const getChild = () => {
+    if (!user.accessToken || !user.child_id) return;
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", user.accessToken);
+
+    var requestOptions = {
+      method: "GET",
+      headers: myHeaders,
+      redirect: "follow",
+    };
+    console.log("going to call route: /children?id=" + user.child_id);
+    fetch(
+      "https://api.kindergartenil.com/children?id=" + user.child_id,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("got child info = ", result);
+        setChildInfo(result);
+      })
+      .catch((error) => console.log("error getting child = ", error));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.h1}>שלום יונתן</Text>
+        <Text style={styles.h1}>שלום הורה של {childInfo.first_name}</Text>
       </View>
 
       <View style={styles.footer}>
@@ -240,8 +281,7 @@ export default function ParentScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
-          <ChildCalendar childInfo={childInfo} accessToken={accessToken} />
+          <ChildCalendar childInfo={childInfo} accessToken={user.accessToken} />
         </View>
         <Text onPress={() => setUser({})}>התנתקות</Text>
       </View>

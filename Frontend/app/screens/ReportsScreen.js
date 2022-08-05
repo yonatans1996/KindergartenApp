@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import * as Linking from "expo-linking";
 import { useEffect, useState, useContext, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,30 +25,40 @@ import Checkbox from "expo-checkbox";
 import { AuthContext } from "../Context/AuthContext";
 import * as SecureStore from "expo-secure-store";
 import MonthPickerModal from "../components/MonthPickerModal";
-var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
-
+import * as WebBrowser from "expo-web-browser";
 export default function ParentsScreen({ navigation }) {
   const [value, onChange] = useState(null);
+  const { user } = useContext(AuthContext);
+  const [reportLink, setReportLink] = useState("");
 
   const generateReport = () => {
     if (!value) {
       console.log("no date");
     }
     var myHeaders = new Headers();
-    myHeaders.append("Authorization");
+    myHeaders.append("Authorization", user.accessToken);
 
     var requestOptions = {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",
     };
-
+    const month = value.month() + 1;
+    console.log(
+      "downloading report url = ",
+      "https://api.kindergartenil.com/kindergarten/attendance_spreadsheet?month=" +
+        month
+    );
     fetch(
-      "https://api.kindergartenil.com/kindergarten/attendance_spreadsheet?month=6",
+      "https://api.kindergartenil.com/kindergarten/attendance_spreadsheet?month=" +
+        month,
       requestOptions
     )
       .then((response) => response.text())
-      .then((result) => console.log(result))
+      .then((result) => {
+        console.log("download url = ", result);
+        Linking.openURL(result.replace(/['"]+/g, ""));
+      })
       .catch((error) => console.log("error", error));
   };
 

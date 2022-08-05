@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { Text } from "react-native-paper";
 import { Calendar } from "react-native-calendars";
 import Feather from "react-native-vector-icons/Feather";
@@ -20,6 +21,10 @@ export default function ChildCalendar({ childInfo, accessToken }) {
   ];
 
   const createCalendarObj = async (month) => {
+    if (!accessToken || !childInfo) {
+      console.log("dont have info for calendar. stopping");
+      return;
+    }
     console.log("GOT MONTH = ", month);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
@@ -29,6 +34,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       headers: myHeaders,
       redirect: "follow",
     };
+    console.log("getting attendance for child id = ", childInfo.child_id);
     let url =
       "https://api.kindergartenil.com/attendance?child_id=" +
       childInfo.child_id;
@@ -95,13 +101,54 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     };
     return obj;
   };
+  const notifyMissing = (day) => {
+    var myHeaders = new Headers();
+    myHeaders.append("Authorization", accessToken);
+    myHeaders.append("Content-Type", "application/json");
 
+    var raw = JSON.stringify({
+      date: `${day.year}-${day.month}-${day.day}`,
+      child_id: childInfo.child_id,
+      is_present: "notified-missing",
+      kindergarten_id: childInfo.kindergarten_id,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://api.kindergartenil.com/parent/attendance", requestOptions)
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("notify missing result = ", result);
+        createCalendarObj();
+      })
+      .catch((error) => console.log("error", error));
+  };
   useEffect(() => {
     createCalendarObj();
-  }, []);
+  }, [childInfo]);
   return (
     <Calendar
       hideExtraDays={true}
+      onDayPress={(day) => {
+        console.log("selected day", day);
+        Alert.alert(
+          "דיווח נוכחות",
+          `תאריך: ${day.day}/${day.month}/${day.year}`,
+          [
+            {
+              text: "ביטול",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+            { text: "דיווח לא מגיע", onPress: () => notifyMissing(day) },
+          ]
+        );
+      }}
       renderHeader={(date) => (
         <Text>
           דוח נוכחות של {childInfo.first_name} לחודש{" "}

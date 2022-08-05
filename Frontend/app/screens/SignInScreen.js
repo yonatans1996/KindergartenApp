@@ -84,8 +84,7 @@ export default function SignInScreen({ navigation }) {
       onSuccess: function (result) {
         var accessToken = result.getIdToken().getJwtToken();
         console.log("accessToken = ", accessToken);
-        console.log("REsult = ", JSON.stringify(result));
-        setUser({ accessToken });
+        setUser({ accessToken, type: "teacher" });
         if (rememberUser) {
           saveUserToDevice("rememberbox", "true");
           saveUserToDevice("password", data.password);
@@ -104,6 +103,7 @@ export default function SignInScreen({ navigation }) {
 
   useEffect(() => {
     console.log("Rendered SignInScreen");
+    console.log("user = ", user);
     getUserFromDevice("password").then((result) => {
       setData((prevState) => {
         return { ...prevState, password: result };

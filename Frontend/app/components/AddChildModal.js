@@ -66,14 +66,14 @@ export default function AddChildModal({
     }
     if (phone1WithoutPrefix) {
       phone1WithoutPrefix = `+972${
-        phone1WithoutPrefix[0] === 0
+        phone1WithoutPrefix[0] == 0
           ? phone1WithoutPrefix.slice(1, phone1WithoutPrefix.length)
           : phone1WithoutPrefix
       }`;
     }
     if (phone2WithoutPrefix) {
       phone2WithoutPrefix = `+972${
-        phone2WithoutPrefix[0] === 0
+        phone2WithoutPrefix[0] == 0
           ? phone2WithoutPrefix.slice(1, phone2WithoutPrefix.length)
           : phone2WithoutPrefix
       }`;

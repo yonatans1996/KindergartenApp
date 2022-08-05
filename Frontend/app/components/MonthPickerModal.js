@@ -66,7 +66,7 @@ function MonthPickerModal({ placeholder, value, onChange }) {
         animationType="fade"
         visible={isOpen}
         onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
+          toggleOpen(false);
         }}
       >
         <View style={styles.contentContainer}>
@@ -74,6 +74,7 @@ function MonthPickerModal({ placeholder, value, onChange }) {
             <MonthPicker
               selectedDate={value || new Date()}
               onMonthChange={onChange}
+              maximumDate={new Date(2025, 5)}
               nextText="הבא"
               prevText="הקודם"
               yearDisabledStyle={{ color: "black" }}
