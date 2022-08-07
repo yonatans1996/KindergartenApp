@@ -63,7 +63,7 @@ export default function HomeScreen() {
       .then((response) => response.json())
       .then((result) => {
         console.log("get teacher result = ", result);
-        setUser({ ...result, accessToken: user.accessToken });
+        setUser({ ...result, ...user });
       })
       .catch((error) => console.log("error2", error));
 

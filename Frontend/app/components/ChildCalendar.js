@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Alert } from "react-native";
 import { Text } from "react-native-paper";
 import { Calendar } from "react-native-calendars";
+import { AuthContext } from "../Context/AuthContext";
 import Feather from "react-native-vector-icons/Feather";
 export default function ChildCalendar({ childInfo, accessToken }) {
   const [datesObj, setDatesObj] = useState({});
+  const { user } = useContext(AuthContext);
   const monthNames = [
     "ינואר",
     "פברואר",
@@ -107,10 +109,11 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      date: `${day.year}-${day.month}-${day.day}`,
-      child_id: childInfo.child_id,
+      attendance_date: `${day.year}-${
+        day.month < 10 ? `0${day.month}` : day.month
+      }-${day.day < 10 ? `0${day.day}` : day.day}`,
+      id: childInfo.child_id,
       is_present: message,
-      kindergarten_id: childInfo.kindergarten_id,
     });
     console.log("notify missing raw data = ", raw);
     var requestOptions = {
@@ -136,25 +139,45 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       hideExtraDays={true}
       onDayPress={(day) => {
         console.log("selected day", day);
+        const buttonOptionsParent = [
+          {
+            text: "חזרה",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "ביטול אי הגעה",
+            onPress: () => notifyMissing(day, "no"),
+            style: "cancel",
+          },
+          {
+            text: "דיווח לא מגיע",
+            onPress: () => notifyMissing(day, "notified_missing"),
+          },
+        ];
+        const buttonOptionsTeacher = [
+          {
+            text: "חזרה",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "ביטול הגעה",
+            onPress: () => notifyMissing(day, "no"),
+            style: "cancel",
+          },
+          {
+            text: "סימון הגעה",
+            onPress: () => notifyMissing(day, "yes"),
+          },
+        ];
+        console.log("USER type = ", user);
+        const buttonOptions =
+          user.type == "teacher" ? buttonOptionsTeacher : buttonOptionsParent;
         Alert.alert(
           "דיווח נוכחות",
           `תאריך: ${day.day}/${day.month}/${day.year}`,
-          [
-            {
-              text: "חזרה",
-              onPress: () => console.log("Cancel Pressed"),
-              style: "cancel",
-            },
-            {
-              text: "ביטול נוכחות",
-              onPress: () => notifyMissing(day, "no"),
-              style: "cancel",
-            },
-            {
-              text: "דיווח לא מגיע",
-              onPress: () => notifyMissing(day, "notifed_missing"),
-            },
-          ]
+          buttonOptions
         );
       }}
       renderHeader={(date) => (
