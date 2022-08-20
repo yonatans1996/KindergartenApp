@@ -60,7 +60,7 @@ export default function SignInScreen({ navigation }) {
     let result = await SecureStore.deleteItemAsync(key);
     console.log("Deleted key: ", key, "result: ", result);
   }
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
     var authenticationData = {
@@ -74,6 +74,29 @@ export default function SignInScreen({ navigation }) {
       UserPoolId: "us-east-1_PokjeshX3", // Your user pool id here
       ClientId: "36d8opu7j2e9illge6vlfjdu9h", // Your client id here
     };
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      phone_number: phoneWithPrefix,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    const type = await fetch(
+      "https://api.kindergartenil.com/parent-exist",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .catch((error) =>
+        console.log("error getting if the user is teacher or parent: ", error)
+      );
+    const userType = type.parent_exist ? "parent" : "teacher";
     var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
     var userData = {
       Username: phoneWithPrefix,
@@ -84,7 +107,7 @@ export default function SignInScreen({ navigation }) {
       onSuccess: function (result) {
         var accessToken = result.getIdToken().getJwtToken();
         console.log("accessToken = ", accessToken);
-        setUser({ accessToken, type: "teacher" });
+        setUser({ accessToken, type: userType });
         if (rememberUser) {
           saveUserToDevice("rememberbox", "true");
           saveUserToDevice("password", data.password);

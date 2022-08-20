@@ -3,13 +3,16 @@ import {
   StyleSheet,
   Text,
   View,
-  Modal,
+  ActivityIndicator,
   TouchableOpacity,
   ImageBackground,
 } from "react-native";
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
+import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
+import Feather from "react-native-vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import ChildCalendar from "../components/ChildCalendar";
 export default function ParentScreen() {
@@ -220,11 +223,8 @@ export default function ParentScreen() {
               animating={isUpload}
             />
           )}
-          <Text style={{ color: "white", fontSize: 20 }}>
-            {childInfo.first_name} {childInfo.last_name}
-          </Text>
         </View>
-        <View style={{ flex: 1, width: "90%" }}>
+        <View style={{ flex: 1, width: "90%", marginTop: 10 }}>
           <View
             style={{
               borderColor: "black",
