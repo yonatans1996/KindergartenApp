@@ -12,6 +12,7 @@ import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import * as mime from "react-native-mime-types";
 import Feather from "react-native-vector-icons/Feather";
 import { LinearGradient } from "expo-linear-gradient";
 import ChildCalendar from "../components/ChildCalendar";
@@ -83,7 +84,6 @@ export default function ParentScreen() {
           setUpload(false);
           setImage(false);
         }, 2000);
-        getChildren();
       })
       .catch((error) => console.log("error", error));
   };
