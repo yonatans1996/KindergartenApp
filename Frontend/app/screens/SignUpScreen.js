@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import {
-  Platform,
+  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -28,6 +28,7 @@ import { AuthContext } from "../Context/AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreen({ navigation }) {
+  const [singUp, setSignUp] = useState(false);
   const [checked, setChecked] = React.useState("first");
   const firstNameRef = useRef();
   const lastNameRef = useRef();
@@ -105,6 +106,7 @@ export default function SignUpScreen({ navigation }) {
     return result;
   };
   const handleRegister = () => {
+    setSignUp(true);
     if (
       !data.checkFirstName ||
       !data.checkLastName ||
@@ -114,6 +116,7 @@ export default function SignUpScreen({ navigation }) {
       (checked === "first" && !data.checkKinderName)
     ) {
       Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך");
+      setSignUp(false);
       return;
     }
 
@@ -129,9 +132,10 @@ export default function SignUpScreen({ navigation }) {
       if (err) {
         alert(err.message);
         console.log(JSON.stringify(err));
+        setSignUp(false);
         return;
       }
-      Alert.alert("מיד תועברו למסך הראשי", "ההרשמה הושלמה בהצלחה");
+      // Alert.alert("מיד תועברו למסך הראשי", "ההרשמה הושלמה בהצלחה");
       handleSignIn();
     });
   };
@@ -167,6 +171,7 @@ export default function SignUpScreen({ navigation }) {
       onFailure: function (err) {
         alert(err.message || JSON.stringify(err));
         console.log(JSON.stringify(err));
+        setSignUp(false);
       },
     });
   };
@@ -413,12 +418,18 @@ export default function SignUpScreen({ navigation }) {
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleRegister()}
+            disabled={singUp}
           >
             <LinearGradient
               colors={["#08d4c4", "#01ab9d"]}
               style={styles.signIn}
             >
               <Text style={[styles.textSign, { color: "white" }]}>הרשמה</Text>
+              <ActivityIndicator
+                size="large"
+                color="white"
+                animating={singUp}
+              />
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -493,6 +504,8 @@ const styles = StyleSheet.create({
   signIn: {
     width: "100%",
     height: 50,
+    flexDirection: "row",
+    paddingLeft: 30,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,

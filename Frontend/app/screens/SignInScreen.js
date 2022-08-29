@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import {
-  Dimensions,
+  ActivityIndicator,
   Platform,
   StyleSheet,
   Text,
@@ -26,6 +26,7 @@ import * as SecureStore from "expo-secure-store";
 var AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignInScreen({ navigation }) {
+  const [signedIn, setSignedIn] = useState(false);
   const [data, setData] = useState({
     phone: "",
     password: "",
@@ -61,6 +62,7 @@ export default function SignInScreen({ navigation }) {
     console.log("Deleted key: ", key, "result: ", result);
   }
   const handleSignIn = async () => {
+    setSignedIn(true);
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
     var authenticationData = {
@@ -118,6 +120,7 @@ export default function SignInScreen({ navigation }) {
       },
 
       onFailure: function (err) {
+        setSignedIn(false);
         alert(err.message || JSON.stringify(err));
         console.log(JSON.stringify(err));
       },
@@ -236,9 +239,18 @@ export default function SignInScreen({ navigation }) {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => handleSignIn()}>
+        <TouchableOpacity
+          disabled={signedIn}
+          style={styles.button}
+          onPress={() => handleSignIn()}
+        >
           <LinearGradient colors={["#08d4c4", "#01ab9d"]} style={styles.signIn}>
             <Text style={[styles.textSign, { color: "white" }]}>התחברות</Text>
+            <ActivityIndicator
+              size="large"
+              color="white"
+              animating={signedIn}
+            />
           </LinearGradient>
         </TouchableOpacity>
         <TouchableOpacity
@@ -310,6 +322,8 @@ const styles = StyleSheet.create({
   },
   signIn: {
     width: "100%",
+    flexDirection: "row",
+    paddingLeft: 30,
     height: 50,
     justifyContent: "center",
     alignItems: "center",

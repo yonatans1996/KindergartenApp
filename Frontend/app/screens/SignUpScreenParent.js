@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import {
-  Platform,
+  ActivityIndicator,
   StyleSheet,
   Text,
   View,
@@ -28,6 +28,7 @@ import { AuthContext } from "../Context/AuthContext";
 const AmazonCognitoIdentity = require("amazon-cognito-identity-js");
 
 export default function SignUpScreenParent({ navigation }) {
+  const [signUp, setSignUp] = useState(false);
   const firstNameRef = useRef();
   const phoneRef = useRef();
   const passRef = useRef();
@@ -63,16 +64,46 @@ export default function SignUpScreenParent({ navigation }) {
     setData({ ...data, showPass: !data.showPass });
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
+    setSignUp(true);
     console.log(data);
     if (!data.checkFirstName || !data.checkPhone || !data.checkPassword) {
       Alert.alert("", "אחד או יותר מהשדות לא מלאים כמו שצריך");
+      setSignUp(false);
       return;
     }
 
     console.log("registering");
     const hashedPassword = md5.hex_md5(data.password);
     const phoneWithPrefix = `+972${data.phone.slice(1, data.phone.length)}`;
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      phone_number: phoneWithPrefix,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+    const type = await fetch(
+      "https://api.kindergartenil.com/parent-exist",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .catch((error) =>
+        console.log("error getting if the user is teacher or parent: ", error)
+      );
+
+    const userType = type.parent_exist ? "parent" : "teacher";
+    if (userType === "teacher") {
+      Alert.alert("שגיאה", "מספר טלפון לא משויך לילד/ה");
+      setSignUp(false);
+      return;
+    }
     var poolData = {
       UserPoolId: "us-east-1_PokjeshX3", // Your user pool id here
       ClientId: "36d8opu7j2e9illge6vlfjdu9h", // Your client id here
@@ -82,9 +113,10 @@ export default function SignUpScreenParent({ navigation }) {
       if (err) {
         alert(err.message);
         console.log(JSON.stringify(err));
+        setSignUp(false);
         return;
       }
-      Alert.alert("מיד תועברו למסך הראשי", "ההרשמה הושלמה בהצלחה");
+      // Alert.alert("מיד תועברו למסך הראשי", "ההרשמה הושלמה בהצלחה");
       handleSignIn();
     });
   };
@@ -121,6 +153,7 @@ export default function SignUpScreenParent({ navigation }) {
       onFailure: function (err) {
         alert(err.message || JSON.stringify(err));
         console.log(JSON.stringify(err));
+        setSignUp(false);
       },
     });
   };
@@ -257,6 +290,7 @@ export default function SignUpScreenParent({ navigation }) {
           <View style={[styles.radioBox, { marginTop: 35 }]}></View>
           <TouchableOpacity
             style={styles.button}
+            disabled={signUp}
             onPress={() => handleRegister()}
           >
             <LinearGradient
@@ -264,6 +298,11 @@ export default function SignUpScreenParent({ navigation }) {
               style={styles.signIn}
             >
               <Text style={[styles.textSign, { color: "white" }]}>הרשמה</Text>
+              <ActivityIndicator
+                size="large"
+                color="white"
+                animating={signUp}
+              />
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -338,6 +377,8 @@ const styles = StyleSheet.create({
   signIn: {
     width: "100%",
     height: 50,
+    flexDirection: "row",
+    paddingLeft: 30,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
