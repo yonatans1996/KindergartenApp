@@ -202,13 +202,17 @@ function Children({ children, accessToken, getChildren }) {
             renderSectionHeader={({ section }) => (
               <View
                 style={{
-                  borderBottomColor: "black",
-                  borderBottomWidth: 1,
-                  borderTopWidth: 1,
+                  borderColor: "#009387",
+                  borderBottomWidth: 2,
                 }}
               >
                 <Text
-                  style={{ width: windowDimensions.width, textAlign: "center" }}
+                  style={{
+                    width: windowDimensions.width,
+                    textAlign: "center",
+                    color: "#009387",
+                    fontWeight: "700",
+                  }}
                 >
                   {section.data[0].group_name}
                 </Text>

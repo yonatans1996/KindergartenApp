@@ -14,13 +14,15 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as mime from "react-native-mime-types";
 import Feather from "react-native-vector-icons/Feather";
+import LottieView from "lottie-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ChildCalendar from "../components/ChildCalendar";
 export default function ParentScreen() {
   const { user, setUser } = useContext(AuthContext);
   const [image, setImage] = useState(null);
   const [isUpload, setUpload] = useState(false);
-  const [childInfo, setChildInfo] = useState({});
+  const [childInfo, setChildInfo] = useState({ first_name: "..." });
+  const [loading, setLoading] = useState(true);
 
   const takePhotoFromCamera = async () => {
     let image = await ImagePicker.launchCameraAsync({
@@ -126,6 +128,7 @@ export default function ParentScreen() {
       .then((result) => {
         setUser({ ...user, ...result });
         console.log("got parent result = ", { ...user, ...result });
+        setLoading(false);
       })
       .catch((error) => console.log("error getting parent. ", error));
   }, []);
@@ -162,128 +165,141 @@ export default function ParentScreen() {
       <View style={styles.header}>
         <Text style={styles.h1}>שלום הורה של {childInfo.first_name}</Text>
       </View>
-
       <View style={styles.footer}>
-        <View style={{ alignItems: "center" }}>
-          {image && !image.cancelled ? (
-            <View
-              style={{
-                flexDirection: "row-reverse",
-                alignItems: "center",
-                width: "100%",
-                justifyContent: "space-evenly",
-              }}
-            >
-              <TouchableOpacity onPress={() => uploadToS3()}>
-                <Feather name="check-circle" color="green" size={80} />
-              </TouchableOpacity>
-              <ImageBackground
-                style={{
-                  width: 150,
-                  height: 150,
-                  resizeMode: "cover",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                }}
-                imageStyle={{ borderRadius: 10 }}
-                source={{
-                  uri: image.uri,
-                }}
-              >
-                <Text
+        {loading ? (
+          <LottieView
+            autoPlay={true}
+            loop={true}
+            style={{}}
+            source={require("../Lotties/loading-saving.json")}
+          />
+        ) : (
+          <>
+            <View style={{ alignItems: "center" }}>
+              {image && !image.cancelled ? (
+                <View
                   style={{
-                    textAlign: "center",
-                    fontWeight: "bold",
-                    backgroundColor: "rgba(193, 193, 193, 0.61)",
+                    flexDirection: "row-reverse",
+                    alignItems: "center",
+                    width: "100%",
+                    justifyContent: "space-evenly",
                   }}
                 >
-                  נא לאשר את שינוי התמונה
-                </Text>
-              </ImageBackground>
+                  <TouchableOpacity onPress={() => uploadToS3()}>
+                    <Feather name="check-circle" color="green" size={80} />
+                  </TouchableOpacity>
+                  <ImageBackground
+                    style={{
+                      width: 150,
+                      height: 150,
+                      resizeMode: "cover",
+                      display: "flex",
+                      justifyContent: "flex-start",
+                    }}
+                    imageStyle={{ borderRadius: 10 }}
+                    source={{
+                      uri: image.uri,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        fontWeight: "bold",
+                        backgroundColor: "rgba(193, 193, 193, 0.61)",
+                      }}
+                    >
+                      נא לאשר את שינוי התמונה
+                    </Text>
+                  </ImageBackground>
 
-              <TouchableOpacity onPress={() => setImage(null)}>
-                <Feather name="x-circle" color="red" size={80} />
-              </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setImage(null)}>
+                    <Feather name="x-circle" color="red" size={80} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <ImageBackground
+                  style={{ width: 150, height: 150, resizeMode: "cover" }}
+                  imageStyle={{ borderRadius: 10 }}
+                  source={{
+                    uri: childInfo.photo_link
+                      ? childInfo.photo_link
+                      : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
+                  }}
+                ></ImageBackground>
+              )}
+              {isUpload && (
+                <ActivityIndicator
+                  size="large"
+                  color="#08d4c4"
+                  animating={isUpload}
+                />
+              )}
             </View>
-          ) : (
-            <ImageBackground
-              style={{ width: 150, height: 150, resizeMode: "cover" }}
-              imageStyle={{ borderRadius: 10 }}
-              source={{
-                uri: childInfo.photo_link
-                  ? childInfo.photo_link
-                  : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png",
-              }}
-            ></ImageBackground>
-          )}
-          {isUpload && (
-            <ActivityIndicator
-              size="large"
-              color="#08d4c4"
-              animating={isUpload}
-            />
-          )}
-        </View>
-        <View style={{ flex: 1, width: "90%", marginTop: 10 }}>
-          <View
-            style={{
-              borderColor: "black",
-              borderWidth: 1,
-              backgroundColor: " #b3fff0",
-            }}
-          >
-            <Text style={{ textAlign: "center", fontSize: 16 }}>
-              החלף תמונה
-            </Text>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-around",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => takePhotoFromCamera()}
-                style={{ width: "48%" }}
+            <View style={{ flex: 1, width: "90%", marginTop: 10 }}>
+              <View
+                style={{
+                  borderColor: "black",
+                  borderWidth: 1,
+                  backgroundColor: " #b3fff0",
+                }}
               >
-                <LinearGradient
-                  colors={["#08d4c4", "#01ab9d"]}
-                  style={{ borderRadius: 30 }}
+                <Text style={{ textAlign: "center", fontSize: 16 }}>
+                  החלף תמונה
+                </Text>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-around",
+                  }}
                 >
-                  <Text
-                    style={[
-                      styles.textSign,
-                      { color: "white", textAlign: "center", padding: 10 },
-                    ]}
+                  <TouchableOpacity
+                    onPress={() => takePhotoFromCamera()}
+                    style={{ width: "48%" }}
                   >
-                    צלם תמונה
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => takePhotoFromGallery()}
-                style={{ marginTop: 15, marginBottom: 15, width: "48%" }}
-              >
-                <LinearGradient
-                  colors={["#08d4c4", "#01ab9d"]}
-                  style={{ borderRadius: 30 }}
-                >
-                  <Text
-                    style={[
-                      styles.textSign,
-                      { color: "white", textAlign: "center", padding: 10 },
-                    ]}
+                    <LinearGradient
+                      colors={["#08d4c4", "#01ab9d"]}
+                      style={{ borderRadius: 30 }}
+                    >
+                      <Text
+                        style={[
+                          styles.textSign,
+                          { color: "white", textAlign: "center", padding: 10 },
+                        ]}
+                      >
+                        צלם תמונה
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => takePhotoFromGallery()}
+                    style={{ marginTop: 15, marginBottom: 15, width: "48%" }}
                   >
-                    בחר תמונה מגלריה
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
+                    <LinearGradient
+                      colors={["#08d4c4", "#01ab9d"]}
+                      style={{ borderRadius: 30 }}
+                    >
+                      <Text
+                        style={[
+                          styles.textSign,
+                          { color: "white", textAlign: "center", padding: 10 },
+                        ]}
+                      >
+                        בחר תמונה מגלריה
+                      </Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <ChildCalendar
+                childInfo={childInfo}
+                accessToken={user.accessToken}
+              />
             </View>
-          </View>
-          <ChildCalendar childInfo={childInfo} accessToken={user.accessToken} />
-        </View>
-        <Text onPress={() => setUser({})}>התנתקות</Text>
+            <Text onPress={() => setUser({})}>התנתקות</Text>
+          </>
+        )}
       </View>
     </View>
   );

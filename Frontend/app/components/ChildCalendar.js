@@ -151,7 +151,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
             style: "cancel",
           },
           {
-            text: "דיווח לא מגיע",
+            text: "סימון אי הגעה",
             onPress: () => notifyMissing(day, "notified_missing"),
           },
         ];

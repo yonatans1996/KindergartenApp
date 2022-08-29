@@ -33,10 +33,12 @@ export default function SettingsScreen() {
         </Text>
       </View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-        <Text>שם הגן: {kinderInfo.kindergarten_name}</Text>
-        <Text>מזהה הגן: {kinderInfo.kindergarten_id}</Text>
-        <Text>שם קבוצה: {user.group_name}</Text>
-        <Groups />
+        <View>
+          <Text>שם הגן: {kinderInfo.kindergarten_name}</Text>
+          <Text>מזהה הגן: {kinderInfo.kindergarten_id}</Text>
+          <Text>שם קבוצה: {user.group_name}</Text>
+          <Groups />
+        </View>
         <Text
           style={{ textAlign: "center", paddingTop: 15 }}
           onPress={() => setUser({})}
@@ -62,6 +64,7 @@ const styles = StyleSheet.create({
   footer: {
     flex: 3,
     width: "100%",
+    justifyContent: "space-between",
     backgroundColor: "#fff",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
