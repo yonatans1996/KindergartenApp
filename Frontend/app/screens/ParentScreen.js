@@ -83,8 +83,7 @@ export default function ParentScreen() {
       .then((result) => {
         console.log("uploaded image to s3. " + result);
         setTimeout(() => {
-          setUpload(false);
-          setImage(false);
+          getChild();
         }, 2000);
       })
       .catch((error) => console.log("error", error));
@@ -156,6 +155,8 @@ export default function ParentScreen() {
       .then((result) => {
         console.log("got child info = ", result);
         setChildInfo(result);
+        setUpload(false);
+        setImage(false);
       })
       .catch((error) => console.log("error getting child = ", error));
   };

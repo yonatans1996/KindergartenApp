@@ -10,18 +10,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import * as Linking from "expo-linking";
-import { useEffect, useState, useContext, useRef } from "react";
-import { Ionicons } from "@expo/vector-icons";
+import { useState, useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import MaterialIcons from "react-native-vector-icons";
-import { faPhone, faLock } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import Feather from "react-native-vector-icons/Feather";
 import * as Animatable from "react-native-animatable";
-import { text } from "@fortawesome/fontawesome-svg-core";
-import * as AWS from "aws-sdk/global";
-import md5 from "react-native-md5";
-import Checkbox from "expo-checkbox";
 import { AuthContext } from "../Context/AuthContext";
 import * as SecureStore from "expo-secure-store";
 import MonthPickerModal from "../components/MonthPickerModal";

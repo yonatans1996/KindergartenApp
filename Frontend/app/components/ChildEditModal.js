@@ -4,7 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
+  Linking,
   TouchableOpacity,
   ImageBackground,
   Alert,
@@ -13,6 +13,7 @@ import {
 import Feather from "react-native-vector-icons/Feather";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
+import MaterialIcons from "react-native-vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as mime from "react-native-mime-types";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -223,42 +224,49 @@ export default function AddChildModal({
         </Text> */}
       </View>
       <View style={{ flex: 1, width: "90%" }}>
-        <TouchableOpacity
-          onPress={() => takePhotoFromCamera()}
-          style={{ marginTop: 15 }}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
         >
-          <LinearGradient
-            colors={["#08d4c4", "#01ab9d"]}
-            style={{ borderRadius: 30 }}
+          <TouchableOpacity
+            onPress={() => takePhotoFromCamera()}
+            style={{ marginTop: 15, flex: 1, marginLeft: 10, marginRight: 10 }}
           >
-            <Text
-              style={[
-                styles.textSign,
-                { color: "white", textAlign: "center", padding: 10 },
-              ]}
+            <LinearGradient
+              colors={["#08d4c4", "#01ab9d"]}
+              style={{ borderRadius: 30 }}
             >
-              צלם תמונה
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => takePhotoFromGallery()}
-          style={{ marginTop: 15 }}
-        >
-          <LinearGradient
-            colors={["#08d4c4", "#01ab9d"]}
-            style={{ borderRadius: 30 }}
+              <Text
+                style={[
+                  styles.textSign,
+                  { color: "white", textAlign: "center", padding: 10 },
+                ]}
+              >
+                צלם תמונה
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => takePhotoFromGallery()}
+            style={{ marginTop: 15, flex: 1, marginLeft: 10, marginRight: 10 }}
           >
-            <Text
-              style={[
-                styles.textSign,
-                { color: "white", textAlign: "center", padding: 10 },
-              ]}
+            <LinearGradient
+              colors={["#08d4c4", "#01ab9d"]}
+              style={{ borderRadius: 30 }}
             >
-              בחר תמונה מגלריה
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
+              <Text
+                style={[
+                  styles.textSign,
+                  { color: "white", textAlign: "center", padding: 10 },
+                ]}
+              >
+                בחר תמונה מגלריה
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity
           onPress={() => deleteConfirmationAlert()}
           style={{ marginTop: 15, marginBottom: 15 }}
@@ -277,6 +285,61 @@ export default function AddChildModal({
             </Text>
           </LinearGradient>
         </TouchableOpacity>
+        <View>
+          {(childInfo.parent1_phone_number != "" ||
+            childInfo.parent2_phone_number != "") && (
+            <Text
+              style={{
+                color: "white",
+                textAlign: "center",
+                fontSize: 18,
+                marginTop: -10,
+                fontWeight: "bold",
+              }}
+            >
+              מספרי טלפון של הורים
+            </Text>
+          )}
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              marginBottom: 10,
+            }}
+          >
+            <View style={{ flexDirection: "row" }}>
+              {childInfo.parent1_phone_number ? (
+                <>
+                  <Text
+                    style={{ color: "white" }}
+                    onPress={() =>
+                      Linking.openURL("tel://" + childInfo.parent1_phone_number)
+                    }
+                  >
+                    {"0" + childInfo.parent1_phone_number.slice(4)}
+                  </Text>
+                  <Feather name="phone" color="#08d4c4" size={20} />
+                </>
+              ) : null}
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              {childInfo.parent2_phone_number ? (
+                <>
+                  <Text
+                    style={{ color: "white" }}
+                    onPress={() =>
+                      Linking.openURL("tel://" + childInfo.parent2_phone_number)
+                    }
+                  >
+                    {"0" + childInfo.parent2_phone_number.slice(4)}
+                  </Text>
+                  <Feather name="phone" color="#08d4c4" size={20} />
+                </>
+              ) : null}
+            </View>
+          </View>
+        </View>
         <ChildCalendar childInfo={childInfo} accessToken={accessToken} />
       </View>
 
@@ -412,7 +475,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   textSign: {
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: "bold",
   },
 });

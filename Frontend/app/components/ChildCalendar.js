@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
-import { Alert } from "react-native";
+import { Alert, ActivityIndicator } from "react-native";
 import { Text } from "react-native-paper";
 import { Calendar } from "react-native-calendars";
 import { AuthContext } from "../Context/AuthContext";
 import Feather from "react-native-vector-icons/Feather";
 export default function ChildCalendar({ childInfo, accessToken }) {
   const [datesObj, setDatesObj] = useState({});
+  const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  const loadingHeight = user.type === "teacher" ? "57%" : "65%";
   const monthNames = [
     "ינואר",
     "פברואר",
@@ -23,6 +25,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
   ];
 
   const createCalendarObj = async (month) => {
+    if (!loading) setLoading(true);
     if (!accessToken || !childInfo) {
       console.log("dont have info for calendar. stopping");
       return;
@@ -46,7 +49,10 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     console.log("URL " + url);
     const respond = await fetch(url, requestOptions)
       .then((response) => response.json())
-      .catch((error) => console.log("error getting calendar dates: ", error));
+      .catch((error) => {
+        console.log("error getting calendar dates: ", error);
+        setLoading(false);
+      });
 
     const arrivedDates = respond.arrived;
     console.log("arrived dates = ", arrivedDates);
@@ -62,6 +68,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       datesObj = { ...datesObj, ...newDate };
     });
     setDatesObj(datesObj);
+    setLoading(false);
     /*
  "2022-03-20": {
           customStyles: {
@@ -104,6 +111,7 @@ export default function ChildCalendar({ childInfo, accessToken }) {
     return obj;
   };
   const notifyMissing = (day, message) => {
+    setLoading(true);
     var myHeaders = new Headers();
     myHeaders.append("Authorization", accessToken);
     myHeaders.append("Content-Type", "application/json");
@@ -127,78 +135,89 @@ export default function ChildCalendar({ childInfo, accessToken }) {
       .then((response) => response.json())
       .then((result) => {
         console.log("notify missing result = ", result);
-        createCalendarObj();
+        createCalendarObj(day.month > 9 ? day.month : `0${day.month}`);
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => {
+        console.log("error", error);
+        setLoading(false);
+      });
   };
   useEffect(() => {
     createCalendarObj();
   }, [childInfo]);
   return (
-    <Calendar
-      hideExtraDays={true}
-      onDayPress={(day) => {
-        console.log("selected day", day);
-        const buttonOptionsParent = [
-          {
-            text: "חזרה",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          {
-            text: "ביטול אי הגעה",
-            onPress: () => notifyMissing(day, "no"),
-            style: "cancel",
-          },
-          {
-            text: "סימון אי הגעה",
-            onPress: () => notifyMissing(day, "notified_missing"),
-          },
-        ];
-        const buttonOptionsTeacher = [
-          {
-            text: "חזרה",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          {
-            text: "ביטול הגעה",
-            onPress: () => notifyMissing(day, "no"),
-            style: "cancel",
-          },
-          {
-            text: "סימון הגעה",
-            onPress: () => notifyMissing(day, "yes"),
-          },
-        ];
-        console.log("USER type = ", user);
-        const buttonOptions =
-          user.type == "teacher" ? buttonOptionsTeacher : buttonOptionsParent;
-        Alert.alert(
-          "דיווח נוכחות",
-          `תאריך: ${day.day}/${day.month}/${day.year}`,
-          buttonOptions
-        );
-      }}
-      renderHeader={(date) => (
-        <Text>
-          דוח נוכחות של {childInfo.first_name} לחודש{" "}
-          {monthNames[date.getMonth()]}
-        </Text>
-      )}
-      renderArrow={(direction) => (
-        <Feather
-          name={direction === "right" ? "arrow-left" : "arrow-right"}
-          color="green"
-          size={20}
-        />
-      )}
-      markingType={"custom"}
-      markedDates={datesObj}
-      onMonthChange={(date) => {
-        console.log("month changed", date);
-        createCalendarObj(date.month);
-      }}
-    />
+    <>
+      <Calendar
+        displayLoadingIndicator
+        hideExtraDays={true}
+        onDayPress={(day) => {
+          console.log("selected day", day);
+          const buttonOptionsParent = [
+            {
+              text: "חזרה",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+            {
+              text: "ביטול אי הגעה",
+              onPress: () => notifyMissing(day, "no"),
+              style: "cancel",
+            },
+            {
+              text: "סימון אי הגעה",
+              onPress: () => notifyMissing(day, "notified_missing"),
+            },
+          ];
+          const buttonOptionsTeacher = [
+            {
+              text: "חזרה",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
+            },
+            {
+              text: "ביטול הגעה",
+              onPress: () => notifyMissing(day, "no"),
+              style: "cancel",
+            },
+            {
+              text: "סימון הגעה",
+              onPress: () => notifyMissing(day, "yes"),
+            },
+          ];
+          console.log("USER type = ", user);
+          const buttonOptions =
+            user.type == "teacher" ? buttonOptionsTeacher : buttonOptionsParent;
+          Alert.alert(
+            "דיווח נוכחות",
+            `תאריך: ${day.day}/${day.month}/${day.year}`,
+            buttonOptions
+          );
+        }}
+        renderHeader={(date) => (
+          <Text>
+            נוכחות של {childInfo.first_name} לחודש {monthNames[date.getMonth()]}
+          </Text>
+        )}
+        renderArrow={(direction) => (
+          <Feather
+            name={direction === "right" ? "arrow-left" : "arrow-right"}
+            color="green"
+            size={20}
+          />
+        )}
+        markingType={"custom"}
+        markedDates={datesObj}
+        onMonthChange={(date) => {
+          console.log("month changed", date);
+          createCalendarObj(date.month);
+        }}
+      />
+      <ActivityIndicator
+        style={{ position: "absolute", width: "100%", bottom: loadingHeight }}
+        size="small"
+        color="#08d4c4"
+        animating={loading}
+      />
+    </>
   );
 }
