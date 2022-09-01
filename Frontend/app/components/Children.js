@@ -34,7 +34,7 @@ const Child = ({
       onPress={() => handleChildPress(child.child_id, child.is_present, child)}
       style={[
         styles.childrenBox,
-        { backgroundColor: child.is_present === "yes" ? "green" : "red" },
+        { backgroundColor: child.is_present === "yes" ? "#188f86" : "#c45652" },
       ]}
     >
       <Image
